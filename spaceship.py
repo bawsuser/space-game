@@ -29,6 +29,11 @@ class Player(pg.sprite.Sprite):
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_a:
                     self.angle_speed = self.rot_speed
+                elif event.key == pg.K_SPACE:
+                    laser = Laser()
+                    laser.rect.centerx = player.rect.centerx
+                    laser.rect.bottom = player.rect.centery
+                    sprites.add(laser)                    
                 elif event.key == pg.K_d:
                     self.angle_speed = -self.rot_speed
                 elif event.key == pg.K_LEFT:
@@ -66,7 +71,19 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.rect.center)
         return False
 
+
+class Laser(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pg.Surface([20, 50])
+        self.image.fill((0, 0, 255))
+        self.rect = self.image.get_rect()
  
+    def update(self):
+        if self.rect.y < 0: self.kill()
+        self.rect.y -= 30
+
+
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
@@ -76,6 +93,7 @@ while not done:
     done = player.control()
     disp.fill((0,0,0))
     disp.blit(bg, (0, 0))
+    sprites.update()
     sprites.draw(disp)
     pg.display.flip()
     clock.tick(FPS)
