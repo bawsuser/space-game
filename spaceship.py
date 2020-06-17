@@ -50,6 +50,15 @@ class Player(pg.sprite.Sprite):
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
 
+        if self.rect.right < 0:
+            self.rect.left = WIDTH
+        elif WIDTH < self.rect.left:
+            self.rect.right = 0
+        if self.rect.bottom < 0:
+            self.rect.top = HEIGHT
+        elif HEIGHT < self.rect.top:
+            self.rect.bottom = 0
+            
         self.rect.centerx += self.x_speed
         self.rect.centery += self.y_speed
         self.angle += self.angle_speed
