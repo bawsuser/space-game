@@ -75,14 +75,30 @@ class Player(pg.sprite.Sprite):
 class Laser(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pg.Surface([20, 50])
+        self.image = pg.Surface([20, 20])
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
+        self.angle = player.angle
  
     def update(self):
-        if self.rect.y < 0 or self.rect.y > WIDTH:
+        if self.rect.y < 0 or self.rect.y > HEIGHT:
             self.kill()
-        self.rect.y -= 30
+        elif self.rect.x < 0 or self.rect.x > WIDTH:
+            self.kill()
+        if self.angle < 0:
+            self.angle += 360
+        if 0 <= self.angle <= 90:
+            self.rect.y -= 30*(90-self.angle)/90 
+            self.rect.x -= 30*self.angle/90
+        elif 90 <= self.angle <= 180:
+            self.rect.y += 30*(self.angle-90)/90 
+            self.rect.x -= 30*(180-self.angle)/90
+        elif 180 <= self.angle <= 270:
+            self.rect.y += 30*(90-(self.angle-180))/90 
+            self.rect.x += 30*(self.angle-180)/90
+        elif 270 <= self.angle <= 360:
+            self.rect.y -= 30*(self.angle-270)/90 
+            self.rect.x += 30*(90-(self.angle-270))/90        
 
 
 player = Player(20, 5)
