@@ -80,7 +80,8 @@ class Laser(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
  
     def update(self):
-        if self.rect.y < 0: self.kill()
+        if self.rect.y < 0 or self.rect.y > WIDTH:
+            self.kill()
         self.rect.y -= 30
 
 
