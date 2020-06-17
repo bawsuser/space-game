@@ -5,6 +5,8 @@ WIDTH = 2560
 HEIGHT = 1440
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
+img = pg.image.load("pixelart/space.png").convert_alpha()
+bg = pg.transform.scale(img, (WIDTH, HEIGHT))
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, rot_speed):
@@ -64,6 +66,7 @@ clock = pg.time.Clock()
 while not done:
     done = player.control()
     disp.fill((0,0,0))
+    disp.blit(bg, (0, 0))
     sprites.draw(disp)
     pg.display.flip()
     clock.tick(FPS)
