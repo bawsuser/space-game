@@ -10,17 +10,17 @@ img = pg.image.load("pixelart/space.png").convert_alpha()
 bg = pg.transform.scale(img, (WIDTH, HEIGHT))
  
 class Player(pg.sprite.Sprite):
-    def __init__(self, speed, rot_speed):
+    def __init__(self, speed, angle_speed):
         super().__init__()
         self.orig = pg.image.load("pixelart/space_ship.png")
         self.image = self.orig
         self.disp_rect = disp.get_rect()
         self.rect = self.orig.get_rect(center=self.disp_rect.center)
         self.speed = speed
-        self.x_speed = 0
-        self.y_speed = 0
-        self.rot_speed = rot_speed
-        self.angle_speed = 0
+        self.x_increase = 0
+        self.y_increase = 0
+        self.angle_speed = angle_speed
+        self.angle_increase = 0
         self.angle = 0
         self.shoot = False
         self.shoot_d = 0.3
@@ -33,26 +33,26 @@ class Player(pg.sprite.Sprite):
                 return True
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_a:
-                    self.angle_speed = self.rot_speed
+                    self.angle_increase = self.angle_speed
                 elif event.key == pg.K_d:
-                    self.angle_speed = -self.rot_speed
+                    self.angle_increase = -self.angle_speed
+                elif event.key == pg.K_LEFT:
+                    self.x_increase = -self.speed
+                elif event.key == pg.K_RIGHT:
+                    self.x_increase = self.speed
+                elif event.key == pg.K_UP:
+                    self.y_increase = -self.speed
+                elif event.key == pg.K_DOWN:
+                    self.y_increase = self.speed
                 elif event.key == pg.K_SPACE:
                    self.shoot = True
-                elif event.key == pg.K_LEFT:
-                    self.x_speed = -self.speed
-                elif event.key == pg.K_RIGHT:
-                    self.x_speed = self.speed
-                elif event.key == pg.K_UP:
-                    self.y_speed = -self.speed
-                elif event.key == pg.K_DOWN:
-                    self.y_speed = self.speed
             elif event.type == pg.KEYUP:
                 if (event.key == pg.K_LEFT or event.key == pg.K_RIGHT):
-                    self.x_speed = 0
+                    self.x_increase = 0
                 elif (event.key == pg.K_UP or event.key == pg.K_DOWN):
-                    self.y_speed = 0
+                    self.y_increase = 0
                 elif event.key == pg.K_a or event.key == pg.K_d:
-                    self.angle_speed = 0
+                    self.angle_increase = 0
                 elif event.key == pg.K_SPACE:
                     self.shoot = False
                     
@@ -70,16 +70,15 @@ class Player(pg.sprite.Sprite):
         if self.rect.right < 0:
             self.rect.left = WIDTH
         elif WIDTH < self.rect.left:
-            self.rect.right = 0
-            
-        if self.rect.bottom < 0:
+            self.rect.right = 0 
+        elif self.rect.bottom < 0:
             self.rect.top = HEIGHT
         elif HEIGHT < self.rect.top:
             self.rect.bottom = 0
             
-        self.rect.centerx += self.x_speed
-        self.rect.centery += self.y_speed
-        self.angle += self.angle_speed
+        self.rect.centerx += self.x_increase
+        self.rect.centery += self.y_increase
+        self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
         return False
@@ -92,15 +91,17 @@ class Laser(pg.sprite.Sprite):
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
         self.angle = player.angle
-        self.speed = 60
+        self.speed = 120
  
     def update(self):
         if self.rect.y < 0 or self.rect.y > HEIGHT:
             self.kill()
         elif self.rect.x < 0 or self.rect.x > WIDTH:
             self.kill()
+            
         if self.angle < 0:
             self.angle += 360
+            
         if 0 <= self.angle <= 90:
             self.rect.y -= self.speed*(90-self.angle)/90 
             self.rect.x -= self.speed*self.angle/90
