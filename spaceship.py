@@ -117,14 +117,34 @@ class Laser(pg.sprite.Sprite):
             self.rect.x += self.speed*(90-(self.angle-270))/90        
 
 
+class Asteroid(pg.sprite.Sprite):
+    def __init__(self, speed, angle_speed):
+        super().__init__()
+        self.orig = pg.image.load("pixelart/meteor.png")
+        self.image = self.orig
+        self.rect = self.orig.get_rect()
+        self.speed = speed
+        self.angle_speed = angle_speed
+        self.angle = 0
+
+    def update(self):
+        if self.angle <= -360 or self.angle >= 360:
+            self.angle = 0
+        self.angle += self.angle_speed
+        self.image = pg.transform.rotate(self.orig, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.rect.y += self.speed
+        self.rect.x += self.speed
+
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
+asteroid = Asteroid(3, 2)
+sprites.add(asteroid)
 done = False
 clock = pg.time.Clock()
 while not done:
     done = player.control()
-    player.update()
     disp.fill((0,0,0))
     disp.blit(bg, (0, 0))
     sprites.update()
