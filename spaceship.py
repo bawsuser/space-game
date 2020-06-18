@@ -55,7 +55,9 @@ class Player(pg.sprite.Sprite):
                     self.angle_increase = 0
                 elif event.key == pg.K_SPACE:
                     self.shoot = False
-                    
+        return False
+
+    def update(self):            
         self.t_now = time.time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser()
@@ -81,7 +83,6 @@ class Player(pg.sprite.Sprite):
         self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
-        return False
 
 
 class Laser(pg.sprite.Sprite):
@@ -123,6 +124,7 @@ done = False
 clock = pg.time.Clock()
 while not done:
     done = player.control()
+    player.update()
     disp.fill((0,0,0))
     disp.blit(bg, (0, 0))
     sprites.update()
