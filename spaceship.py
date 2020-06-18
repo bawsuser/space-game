@@ -1,4 +1,5 @@
 import pygame as pg
+import time
 
 FPS = 60
 WIDTH = 2560
@@ -21,6 +22,10 @@ class Player(pg.sprite.Sprite):
         self.rot_speed = rot_speed
         self.angle_speed = 0
         self.angle = 0
+        self.shoot = False
+        self.shoot_d = 0.3
+        self.t_old = 0
+        self.t_now = self.shoot_d
         
     def control(self):
         for event in pg.event.get(): 
@@ -29,13 +34,10 @@ class Player(pg.sprite.Sprite):
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_a:
                     self.angle_speed = self.rot_speed
-                elif event.key == pg.K_SPACE:
-                    laser = Laser()
-                    laser.rect.centerx = player.rect.centerx
-                    laser.rect.bottom = player.rect.centery
-                    sprites.add(laser)                    
                 elif event.key == pg.K_d:
                     self.angle_speed = -self.rot_speed
+                elif event.key == pg.K_SPACE:
+                   self.shoot = True
                 elif event.key == pg.K_LEFT:
                     self.x_speed = -self.speed
                 elif event.key == pg.K_RIGHT:
@@ -51,14 +53,25 @@ class Player(pg.sprite.Sprite):
                     self.y_speed = 0
                 elif event.key == pg.K_a or event.key == pg.K_d:
                     self.angle_speed = 0
+                elif event.key == pg.K_SPACE:
+                    self.shoot = False
+                    
+        self.t_now = time.time()
+        if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
+            laser = Laser()
+            laser.rect.centerx = player.rect.centerx
+            laser.rect.bottom = player.rect.centery
+            sprites.add(laser)
+            self.t_old = time.time()
                     
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
-
+            
         if self.rect.right < 0:
             self.rect.left = WIDTH
         elif WIDTH < self.rect.left:
             self.rect.right = 0
+            
         if self.rect.bottom < 0:
             self.rect.top = HEIGHT
         elif HEIGHT < self.rect.top:
