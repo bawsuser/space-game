@@ -26,7 +26,7 @@ class Player(pg.sprite.Sprite):
         self.angle_increase = 0
         self.angle = 0
         self.shoot = False
-        self.shoot_d = 0.3
+        self.shoot_d = 0.2
         self.t_old = 0
         self.t_now = self.shoot_d
         
@@ -147,7 +147,6 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.x = randint(0,WIDTH-self.rect.width)
 
 
-
     def update(self):
         if self.rect.y < -self.rect.height or self.rect.y > HEIGHT+self.rect.height:
             self.kill()
@@ -170,7 +169,7 @@ class Asteroid(pg.sprite.Sprite):
 
 
 def disp_update(i):
-    i += 10
+    i += 8
     disp.blit(bg, (0, i))
     disp.blit(bg_mir, (0, i-HEIGHT))
     disp.blit(bg, (0, i-(HEIGHT)*2))
@@ -178,12 +177,17 @@ def disp_update(i):
         i = 0
     return i
 
+
+def spawn_astroids(a):
+    for i in range(a):
+        asteroid = Asteroid(randint(5,10), randint(1,5))
+        sprites.add(asteroid)
+        
+
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-for i in range(10):
-    asteroid = Asteroid(randint(5,10), randint(1,5))
-    sprites.add(asteroid)
+spawn_astroids(10)
 done = False
 clock = pg.time.Clock()
 bg_mov = 0
