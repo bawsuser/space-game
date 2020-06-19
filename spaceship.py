@@ -121,7 +121,7 @@ class Laser(pg.sprite.Sprite):
 class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        self.orig = pg.image.load("pixelart/meteor.png")
+        self.orig = pg.image.load("pixelart/meteor.png").convert_alpha()
         self.image = self.orig
         self.rect = self.orig.get_rect()
         self.speed = speed
@@ -159,8 +159,9 @@ class Asteroid(pg.sprite.Sprite):
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-asteroid = Asteroid(1, 1)
-sprites.add(asteroid)
+for i in range(10):
+    asteroid = Asteroid(randint(1,5), randint(1,5))
+    sprites.add(asteroid)
 done = False
 clock = pg.time.Clock()
 while not done:
