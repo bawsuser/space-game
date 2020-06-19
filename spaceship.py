@@ -187,14 +187,22 @@ def spawn_astroids(a):
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-spawn_astroids(10)
+bg_mov = 0
+
+spawn_delay = 10
+t_old = 0
+t_now = 0
+
 done = False
 clock = pg.time.Clock()
-bg_mov = 0
 while not done:
     done = player.control()
     disp.fill((0,0,0))
     bg_mov = disp_update(bg_mov)
+    t_now = time.time()
+    if t_now-t_old >= spawn_delay:
+        spawn_astroids(10)
+        t_old = time.time()
     sprites.update()
     sprites.draw(disp)
     pg.display.flip()
