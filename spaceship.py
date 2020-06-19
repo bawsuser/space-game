@@ -128,6 +128,7 @@ class Asteroid(pg.sprite.Sprite):
         self.angle_speed = angle_speed
         self.angle = 0
         self.r = randint(1,4)
+        self.side_move = randint(-5,5)
         if 1 == self.r:
             self.rect.x = -self.rect.width
             self.rect.y = randint(0,HEIGHT-self.rect.height)
@@ -160,13 +161,15 @@ class Asteroid(pg.sprite.Sprite):
         
         if self.r == 3 or self.r == 4:
             self.rect.y += self.speed
+            self.rect.x += self.side_move
         else:
             self.rect.x += self.speed
+            self.rect.y += self.side_move
 
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-for i in range(5):
+for i in range(10):
     asteroid = Asteroid(randint(5,10), randint(1,5))
     sprites.add(asteroid)
 done = False
