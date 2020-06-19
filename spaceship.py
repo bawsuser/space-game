@@ -1,6 +1,6 @@
+from random import randint
 import pygame as pg
 import time
-from random import randint
 
 FPS = 60
 WIDTH = 2560
@@ -8,7 +8,9 @@ HEIGHT = 1440
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 img = pg.image.load("pixelart/space.png").convert_alpha()
+img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
 bg = pg.transform.scale(img, (WIDTH, HEIGHT))
+bg_mir = pg.transform.scale(img_mir, (WIDTH, HEIGHT))
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -122,8 +124,8 @@ class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
         self.orig = pg.image.load("pixelart/meteor.png").convert_alpha()
-        self.image = self.orig
         self.rect = self.orig.get_rect()
+        self.image = self.orig
         self.speed = speed
         self.angle_speed = angle_speed
         self.angle = 0
@@ -159,12 +161,22 @@ class Asteroid(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
         
-        if self.r == 3 or self.r == 4:
+        if self.r > 2:
             self.rect.y += self.speed
             self.rect.x += self.side_move
         else:
             self.rect.x += self.speed
             self.rect.y += self.side_move
+
+
+def disp_update(i):
+    i += 10
+    disp.blit(bg, (0, i))
+    disp.blit(bg_mir, (0, i-HEIGHT))
+    disp.blit(bg, (0, i-(HEIGHT)*2))
+    if i >= HEIGHT*2:
+        i = 0
+    return i
 
 player = Player(20, 5)
 sprites = pg.sprite.Group()
@@ -174,10 +186,11 @@ for i in range(10):
     sprites.add(asteroid)
 done = False
 clock = pg.time.Clock()
+bg_mov = 0
 while not done:
     done = player.control()
     disp.fill((0,0,0))
-    disp.blit(bg, (0, 0))
+    bg_mov = disp_update(bg_mov)
     sprites.update()
     sprites.draw(disp)
     pg.display.flip()
