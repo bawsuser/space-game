@@ -146,11 +146,18 @@ class Asteroid(pg.sprite.Sprite):
 
 
     def update(self):
+        if self.rect.y < -self.rect.height or self.rect.y > HEIGHT+self.rect.height:
+            self.kill()
+        elif self.rect.x < -self.rect.width or self.rect.x > WIDTH+self.rect.width:
+            self.kill()
+        
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
+            
         self.angle += self.angle_speed
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+        
         if self.r == 3 or self.r == 4:
             self.rect.y += self.speed
         else:
@@ -159,8 +166,8 @@ class Asteroid(pg.sprite.Sprite):
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-for i in range(10):
-    asteroid = Asteroid(randint(1,5), randint(1,5))
+for i in range(5):
+    asteroid = Asteroid(randint(5,10), randint(1,5))
     sprites.add(asteroid)
 done = False
 clock = pg.time.Clock()
