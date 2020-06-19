@@ -1,5 +1,6 @@
 import pygame as pg
 import time
+from random import randint
 
 FPS = 60
 WIDTH = 2560
@@ -126,6 +127,23 @@ class Asteroid(pg.sprite.Sprite):
         self.speed = speed
         self.angle_speed = angle_speed
         self.angle = 0
+        self.r = randint(1,4)
+        if 1 == self.r:
+            self.rect.x = -self.rect.width
+            self.rect.y = randint(0,HEIGHT-self.rect.height)
+        elif 2 == self.r:
+            self.speed = -self.speed
+            self.rect.x = WIDTH
+            self.rect.y = randint(0,HEIGHT-self.rect.height)
+        elif 3 == self.r:
+            self.speed = -self.speed
+            self.rect.y = HEIGHT
+            self.rect.x = randint(0,WIDTH-self.rect.width)
+        else:
+            self.rect.y = -self.rect.height
+            self.rect.x = randint(0,WIDTH-self.rect.width)
+
+
 
     def update(self):
         if self.angle <= -360 or self.angle >= 360:
@@ -133,13 +151,15 @@ class Asteroid(pg.sprite.Sprite):
         self.angle += self.angle_speed
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
-        self.rect.y += self.speed
-        self.rect.x += self.speed
+        if self.r == 3 or self.r == 4:
+            self.rect.y += self.speed
+        else:
+            self.rect.x += self.speed
 
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-asteroid = Asteroid(3, 2)
+asteroid = Asteroid(1, 1)
 sprites.add(asteroid)
 done = False
 clock = pg.time.Clock()
