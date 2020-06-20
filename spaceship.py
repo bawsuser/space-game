@@ -1,6 +1,6 @@
 from random import randint
+from time import time
 import pygame as pg
-import time
 
 FPS = 60
 WIDTH = 2560
@@ -8,8 +8,8 @@ HEIGHT = 1440
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 img = pg.image.load("pixelart/space.png").convert_alpha()
-img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
 bg = pg.transform.scale(img, (WIDTH, HEIGHT))
+img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
 bg_mir = pg.transform.scale(img_mir, (WIDTH, HEIGHT))
  
 class Player(pg.sprite.Sprite):
@@ -61,13 +61,13 @@ class Player(pg.sprite.Sprite):
         return False
 
     def update(self):            
-        self.t_now = time.time()
+        self.t_now = time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser(self.angle)
             laser.rect.centerx = self.rect.centerx
             laser.rect.bottom = self.rect.centery
             sprites.add(laser)
-            self.t_old = time.time()
+            self.t_old = time()
                     
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
@@ -168,14 +168,14 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.y += self.side_move
 
 
-def disp_update(bg_mov):
-    bg_mov += 8
-    disp.blit(bg, (0, bg_mov))
-    disp.blit(bg_mir, (0, bg_mov-HEIGHT))
-    disp.blit(bg, (0, bg_mov-(HEIGHT)*2))
-    if bg_mov >= HEIGHT*2:
-        bg_mov = 0
-    return bg_mov
+def bg_move(bg_ctr):
+    bg_ctr += 8
+    disp.blit(bg, (0, bg_ctr))
+    disp.blit(bg_mir, (0, bg_ctr-HEIGHT))
+    disp.blit(bg, (0, bg_ctr-(HEIGHT)*2))
+    if bg_ctr >= HEIGHT*2:
+        bg_ctr = 0
+    return bg_ctr
 
 
 def spawn_astroids(spawn_delay):
@@ -187,8 +187,8 @@ def spawn_astroids(spawn_delay):
 player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
-bg_mov = 0
-spawn_delay = 10
+bg_ctr = 0
+spawn_delay = 1
 t_old = 0
 t_now = 0
 done = False
@@ -196,11 +196,11 @@ clock = pg.time.Clock()
 while not done:
     done = player.control()
     disp.fill((0,0,0))
-    bg_mov = disp_update(bg_mov)
-    t_now = time.time()
+    bg_ctr = bg_move(bg_ctr)
+    t_now = time()
     if t_now-t_old >= spawn_delay:
-        spawn_astroids(10)
-        t_old = time.time()
+        spawn_astroids(1)
+        t_old = time()
     sprites.update()
     sprites.draw(disp)
     pg.display.flip()
