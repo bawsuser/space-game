@@ -96,6 +96,7 @@ class Laser(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.angle = angle
         self.speed = 120
+        lasers.add(self)
  
     def update(self):
         if self.rect.y < 0 or self.rect.y > HEIGHT:
@@ -124,8 +125,8 @@ class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
         self.orig = pg.image.load("pixelart/meteor.png").convert_alpha()
-        self.rect = self.orig.get_rect()
         self.image = self.orig
+        self.rect = self.orig.get_rect()
         self.speed = speed
         self.angle_speed = angle_speed
         self.angle = 0
@@ -182,10 +183,13 @@ def spawn_astroids(spawn_delay):
     for i in range(spawn_delay):
         asteroid = Asteroid(randint(5,10), randint(1,5))
         sprites.add(asteroid)
+        astroids.add(asteroid)
         
 
 player = Player(20, 5)
 sprites = pg.sprite.Group()
+astroids = pg.sprite.Group()
+lasers = pg.sprite.Group()
 sprites.add(player)
 bg_ctr = 0
 spawn_delay = 1
@@ -201,6 +205,8 @@ while not done:
     if t_now-t_old >= spawn_delay:
         spawn_astroids(1)
         t_old = time()
+    pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
+    pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
     sprites.update()
     sprites.draw(disp)
     pg.display.flip()
