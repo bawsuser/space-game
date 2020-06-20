@@ -63,9 +63,9 @@ class Player(pg.sprite.Sprite):
     def update(self):            
         self.t_now = time.time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
-            laser = Laser()
-            laser.rect.centerx = player.rect.centerx
-            laser.rect.bottom = player.rect.centery
+            laser = Laser(self.angle)
+            laser.rect.centerx = self.rect.centerx
+            laser.rect.bottom = self.rect.centery
             sprites.add(laser)
             self.t_old = time.time()
                     
@@ -89,12 +89,12 @@ class Player(pg.sprite.Sprite):
 
 
 class Laser(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, angle):
         super().__init__()
         self.image = pg.Surface([20, 20])
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
-        self.angle = player.angle
+        self.angle = angle
         self.speed = 120
  
     def update(self):
@@ -168,18 +168,18 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.y += self.side_move
 
 
-def disp_update(i):
-    i += 8
-    disp.blit(bg, (0, i))
-    disp.blit(bg_mir, (0, i-HEIGHT))
-    disp.blit(bg, (0, i-(HEIGHT)*2))
-    if i >= HEIGHT*2:
-        i = 0
-    return i
+def disp_update(bg_mov):
+    bg_mov += 8
+    disp.blit(bg, (0, bg_mov))
+    disp.blit(bg_mir, (0, bg_mov-HEIGHT))
+    disp.blit(bg, (0, bg_mov-(HEIGHT)*2))
+    if bg_mov >= HEIGHT*2:
+        bg_mov = 0
+    return bg_mov
 
 
-def spawn_astroids(a):
-    for i in range(a):
+def spawn_astroids(spawn_delay):
+    for i in range(spawn_delay):
         asteroid = Asteroid(randint(5,10), randint(1,5))
         sprites.add(asteroid)
         
@@ -188,11 +188,9 @@ player = Player(20, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
 bg_mov = 0
-
 spawn_delay = 10
 t_old = 0
 t_now = 0
-
 done = False
 clock = pg.time.Clock()
 while not done:
