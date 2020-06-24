@@ -1,4 +1,5 @@
 from random import randint
+from random import choice
 from time import time
 import pygame as pg
 
@@ -180,8 +181,9 @@ def bg_move(bg_ctr):
 
 
 def spawn_astroids(spawn_delay):
+    li = list(range(-5,0)) + list(range(1,6))
     for i in range(spawn_delay):
-        asteroid = Asteroid(randint(5,10), randint(1,5))
+        asteroid = Asteroid(randint(5,10), choice(li))
         sprites.add(asteroid)
         astroids.add(asteroid)
         
