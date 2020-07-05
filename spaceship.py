@@ -32,9 +32,12 @@ class Player(pg.sprite.Sprite):
         self.t_now = self.shoot_d
         
     def control(self):
+        #check which keys are pressed and move by these
+        pressed = pg.key.get_pressed()
+        if not pressed[pg.K_a] and not pressed[pg.K_d]):
+            print("Works")
+        
         for event in pg.event.get():
-            if event.type == pg.KEYDOWN and event.key == pg.K_w:
-                print('Forward')
             if event.type == pg.QUIT: 
                 return True
             elif event.type == pg.KEYDOWN:
