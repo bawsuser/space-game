@@ -32,30 +32,32 @@ class Player(pg.sprite.Sprite):
         self.t_now = self.shoot_d
         
     def control(self):
-        for event in pg.event.get(): 
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN and event.key == pg.K_w:
+                print('Forward')
             if event.type == pg.QUIT: 
                 return True
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_a:
+                if event.key == pg.K_q:
                     self.angle_increase = self.angle_speed
-                elif event.key == pg.K_d:
+                elif event.key == pg.K_e:
                     self.angle_increase = -self.angle_speed
-                elif event.key == pg.K_LEFT:
+                elif event.key == pg.K_a:
                     self.x_increase = -self.speed
-                elif event.key == pg.K_RIGHT:
+                elif event.key == pg.K_d:
                     self.x_increase = self.speed
-                elif event.key == pg.K_UP:
+                elif event.key == pg.K_w:
                     self.y_increase = -self.speed
-                elif event.key == pg.K_DOWN:
+                elif event.key == pg.K_s:
                     self.y_increase = self.speed
                 elif event.key == pg.K_SPACE:
-                   self.shoot = True
+                    self.shoot = True
             elif event.type == pg.KEYUP:
-                if (event.key == pg.K_LEFT or event.key == pg.K_RIGHT):
+                if (event.key == pg.K_a or event.key == pg.K_d):
                     self.x_increase = 0
-                elif (event.key == pg.K_UP or event.key == pg.K_DOWN):
+                elif (event.key == pg.K_w or event.key == pg.K_s):
                     self.y_increase = 0
-                elif event.key == pg.K_a or event.key == pg.K_d:
+                elif event.key == pg.K_q or event.key == pg.K_e:
                     self.angle_increase = 0
                 elif event.key == pg.K_SPACE:
                     self.shoot = False
@@ -109,17 +111,17 @@ class Laser(pg.sprite.Sprite):
             self.angle += 360
             
         if 0 <= self.angle <= 90:
-            self.rect.y -= self.speed*(90-self.angle)/90 
-            self.rect.x -= self.speed*self.angle/90
+            self.rect.y -= self.speed*(90-self.angle)//90 
+            self.rect.x -= self.speed*self.angle//90
         elif 90 <= self.angle <= 180:
-            self.rect.y += self.speed*(self.angle-90)/90 
-            self.rect.x -= self.speed*(180-self.angle)/90
+            self.rect.y += self.speed*(self.angle-90)//90 
+            self.rect.x -= self.speed*(180-self.angle)//90
         elif 180 <= self.angle <= 270:
-            self.rect.y += self.speed*(90-(self.angle-180))/90 
-            self.rect.x += self.speed*(self.angle-180)/90
+            self.rect.y += self.speed*(90-(self.angle-180))//90 
+            self.rect.x += self.speed*(self.angle-180)//90
         elif 270 <= self.angle <= 360:
-            self.rect.y -= self.speed*(self.angle-270)/90 
-            self.rect.x += self.speed*(90-(self.angle-270))/90        
+            self.rect.y -= self.speed*(self.angle-270)//90 
+            self.rect.x += self.speed*(90-(self.angle-270))//90        
 
 
 class Asteroid(pg.sprite.Sprite):
