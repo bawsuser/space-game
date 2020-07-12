@@ -4,19 +4,22 @@ from time import time
 import pygame as pg
 
 FPS = 60
-WIDTH = 2560
-HEIGHT = 1440
+WIDTH = 1280
+HEIGHT = 720
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 img = pg.image.load("pixelart/space.png").convert_alpha()
 bg = pg.transform.scale(img, (WIDTH, HEIGHT))
 img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
 bg_mir = pg.transform.scale(img_mir, (WIDTH, HEIGHT))
+img_ship = pg.transform.scale(pg.image.load("pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
+img_meteor = pg.transform.scale(pg.image.load("pixelart/meteor.png"), (WIDTH//10, WIDTH//10))
+img_laser = pg.transform.scale(pg.Surface([20, 20]), (WIDTH//100, WIDTH//100))
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        self.orig = pg.image.load("pixelart/space_ship.png")
+        self.orig = img_ship
         self.image = self.orig
         self.disp_rect = disp.get_rect()
         self.rect = self.orig.get_rect(center=self.disp_rect.center)
@@ -33,9 +36,9 @@ class Player(pg.sprite.Sprite):
         
     def control(self):
         #check which keys are pressed and move by these
-        pressed = pg.key.get_pressed()
-        if not pressed[pg.K_a] and not pressed[pg.K_d]):
-            print("Works")
+        #pressed = pg.key.get_pressed()
+        #if not pressed[pg.K_a] and not pressed[pg.K_d]):
+        #    print("Works")
         
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -97,7 +100,7 @@ class Player(pg.sprite.Sprite):
 class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
         super().__init__()
-        self.image = pg.Surface([20, 20])
+        self.image = img_laser
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
         self.angle = angle
@@ -130,7 +133,7 @@ class Laser(pg.sprite.Sprite):
 class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        self.orig = pg.image.load("pixelart/meteor.png").convert_alpha()
+        self.orig = img_meteor.convert_alpha()
         self.image = self.orig
         self.rect = self.orig.get_rect()
         self.speed = speed
