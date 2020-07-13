@@ -35,39 +35,32 @@ class Player(pg.sprite.Sprite):
         self.t_now = self.shoot_d
         
     def control(self):
-        #check which keys are pressed and move by these
-        #pressed = pg.key.get_pressed()
-        #if not pressed[pg.K_a] and not pressed[pg.K_d]):
-        #    print("Works")
-        
-        for event in pg.event.get():
-            if event.type == pg.QUIT: 
-                return True
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_q:
-                    self.angle_increase = self.angle_speed
-                elif event.key == pg.K_e:
-                    self.angle_increase = -self.angle_speed
-                elif event.key == pg.K_a:
-                    self.x_increase = -self.speed
-                elif event.key == pg.K_d:
-                    self.x_increase = self.speed
-                elif event.key == pg.K_w:
-                    self.y_increase = -self.speed
-                elif event.key == pg.K_s:
-                    self.y_increase = self.speed
-                elif event.key == pg.K_SPACE:
-                    self.shoot = True
-            elif event.type == pg.KEYUP:
-                if (event.key == pg.K_a or event.key == pg.K_d):
-                    self.x_increase = 0
-                elif (event.key == pg.K_w or event.key == pg.K_s):
-                    self.y_increase = 0
-                elif event.key == pg.K_q or event.key == pg.K_e:
-                    self.angle_increase = 0
-                elif event.key == pg.K_SPACE:
-                    self.shoot = False
-        return False
+        pressed = pg.key.get_pressed()
+        if pressed[pg.K_q]:
+            self.angle_increase = self.angle_speed
+        elif pressed[pg.K_e]:
+            self.angle_increase = -self.angle_speed
+        elif not pressed[pg.K_q] or not pressed[pg.K_e]:
+            self.angle_increase = 0
+
+        if pressed[pg.K_a]:
+            self.x_increase = -self.speed
+        elif pressed[pg.K_d]:
+            self.x_increase = self.speed
+        else:
+            self.x_increase = 0
+
+        if pressed[pg.K_w]:
+            self.y_increase = -self.speed
+        elif pressed[pg.K_s]:
+            self.y_increase = self.speed
+        else:
+            self.y_increase = 0
+
+        if pressed[pg.K_SPACE]:
+            self.shoot = True
+        else:
+            self.shoot = False
 
     def update(self):            
         self.t_now = time()
@@ -208,7 +201,11 @@ t_now = 0
 done = False
 clock = pg.time.Clock()
 while not done:
-    done = player.control()
+    for event in pg.event.get():
+        if event.type == pg.QUIT: 
+                done = True
+                    
+    player.control()
     disp.fill((0,0,0))
     bg_ctr = bg_move(bg_ctr)
     t_now = time()
