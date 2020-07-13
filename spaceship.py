@@ -75,7 +75,6 @@ class Player(pg.sprite.Sprite):
             laser = Laser(self.angle)
             laser.rect.centerx = self.rect.centerx
             laser.rect.bottom = self.rect.centery
-            sprites.add(laser)
             self.t_old = time()
                     
         if self.angle <= -360 or self.angle >= 360:
@@ -218,7 +217,9 @@ while not done:
         t_old = time()
     pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
     pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
+    lasers.update()
     sprites.update()
+    lasers.draw(disp)
     sprites.draw(disp)
     pg.display.flip()
     clock.tick(FPS)
