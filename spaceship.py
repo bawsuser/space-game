@@ -13,7 +13,7 @@ bg = pg.transform.scale(img, (WIDTH, HEIGHT))
 img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
 bg_mir = pg.transform.scale(img_mir, (WIDTH, HEIGHT))
 img_ship = pg.transform.scale(pg.image.load("pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
-img_meteor = pg.transform.scale(pg.image.load("pixelart/meteor.png"), (WIDTH//10, WIDTH//10))
+img_meteor = pg.image.load("pixelart/meteor.png")
 img_laser = pg.transform.scale(pg.Surface([20, 20]), (WIDTH//100, WIDTH//100))
  
 class Player(pg.sprite.Sprite):
@@ -104,7 +104,7 @@ class Laser(pg.sprite.Sprite):
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
         self.angle = angle
-        self.speed = 120
+        self.speed = 40
         lasers.add(self)
  
     def update(self):
@@ -133,7 +133,8 @@ class Laser(pg.sprite.Sprite):
 class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        self.orig = img_meteor.convert_alpha()
+        x = WIDTH//randint(7,10)
+        self.orig = pg.transform.scale(img_meteor, (x,x)).convert_alpha()
         self.image = self.orig
         self.rect = self.orig.get_rect()
         self.speed = speed
