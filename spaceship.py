@@ -104,7 +104,7 @@ class Laser(pg.sprite.Sprite):
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
         self.angle = angle
-        self.speed = 40
+        self.speed = WIDTH//40
         lasers.add(self)
  
     def update(self):
@@ -192,12 +192,12 @@ def bg_move(bg_ctr):
 def spawn_astroids(spawn_delay):
     li = list(range(-5,0)) + list(range(1,6))
     for i in range(spawn_delay):
-        asteroid = Asteroid(randint(5,10), choice(li))
+        asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
         sprites.add(asteroid)
         astroids.add(asteroid)
         
 
-player = Player(20, 5)
+player = Player(WIDTH//75, 5)
 sprites = pg.sprite.Group()
 astroids = pg.sprite.Group()
 lasers = pg.sprite.Group()
