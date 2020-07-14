@@ -181,9 +181,9 @@ def bg_move(bg_ctr):
     return bg_ctr
 
 
-def spawn_astroids(spawn_delay):
+def spawn_astroids(blob_size):
     li = list(range(-5,0)) + list(range(1,6))
-    for i in range(spawn_delay):
+    for i in range(blob_size):
         asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
         sprites.add(asteroid)
         astroids.add(asteroid)
