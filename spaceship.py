@@ -101,6 +101,7 @@ class Player(pg.sprite.Sprite):
         disp.blit(
             pg.font.SysFont('Comic Sans MS', 30).render(
                 'HEALTH', False, (255,255,255)),(30,30))
+        
         for hit in self.hits_meteor:
             self.score += 5
 
