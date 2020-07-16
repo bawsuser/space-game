@@ -31,7 +31,11 @@ class Player(pg.sprite.Sprite):
         self.health_style = pg.font.SysFont('Comic Sans MS', 30)
         self.health_surface = self.health_style.render(
             'HEALTH', False, (255,255,255))
-        self.hits = []
+        self.hits_ship = []
+        self.hits_meteor = []
+        self.score = 0
+        self.score_style = pg.font.SysFont('Comic Sans MS', 114)
+        self.score_surface = self.score_style.render('0', False, (255,255,255))
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -62,7 +66,8 @@ class Player(pg.sprite.Sprite):
             self.shoot = False
 
     def update(self):
-        self.hits = pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
+        self.hits_ship = pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
+        self.hits_meteor = pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
         self.t_now = time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser(self.angle)
@@ -88,14 +93,20 @@ class Player(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def draw_health(self):
-        for hit in self.hits:
+    def draw_hud(self):
+        for hit in self.hits_ship:
             self.health -= 5
 
         if 0 < self.health:
             pg.draw.rect (disp, (255,255,255), [30,55,(WIDTH//300)*self.health,40])
 
         disp.blit(self.health_surface,(30,30))
+        for hit in self.hits_meteor:
+            self.score += 5
+
+        self.score_surface = self.score_style.render(
+            "SCORE: " + str(self.score), False, (255,255,255))
+        disp.blit(self.score_surface,(WIDTH-450,30))
 
 
 class Laser(pg.sprite.Sprite):
@@ -228,12 +239,11 @@ while not done:
         spawn_astroids(1)
         t_old = time()
         
-    pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
     lasers.update()
     sprites.update()
     lasers.draw(disp)
     sprites.draw(disp)
-    player.draw_health()
+    player.draw_hud()
     pg.display.flip()
     clock.tick(FPS)
  
