@@ -33,6 +33,9 @@ class Player(pg.sprite.Sprite):
         self.shoot_d = 0.2
         self.t_old = 0
         self.t_now = self.shoot_d
+        self.health = 100
+        self.health_style = pg.font.SysFont('Comic Sans MS', 30)
+        self.health_surface = self.health_style.render('HEALTH', False, (255,255,255))
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -62,7 +65,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.shoot = False
 
-    def update(self):            
+    def update(self):
         self.t_now = time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser(self.angle)
@@ -87,6 +90,15 @@ class Player(pg.sprite.Sprite):
         self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+
+    def draw_health(self):
+        for hit in ship_hits:
+            self.health -= 1
+
+        if 0 < self.health:
+            pg.draw.rect (disp, (255,255,255), [30,55,(WIDTH//300)*self.health,40])
+
+        disp.blit(self.health_surface,(30,30))
 
 
 class Laser(pg.sprite.Sprite):
@@ -187,7 +199,7 @@ def spawn_astroids(blob_size):
         asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
         sprites.add(asteroid)
         astroids.add(asteroid)
-        
+    
 
 player = Player(WIDTH//75, 5)
 sprites = pg.sprite.Group()
@@ -212,12 +224,14 @@ while not done:
     if t_now-t_old >= spawn_delay:
         spawn_astroids(1)
         t_old = time()
-    pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
+        
     pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
+    ship_hits = pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
     lasers.update()
     sprites.update()
     lasers.draw(disp)
     sprites.draw(disp)
+    player.draw_health()
     pg.display.flip()
     clock.tick(FPS)
  
