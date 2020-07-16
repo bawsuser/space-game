@@ -2,6 +2,8 @@ from random import randint
 from random import choice
 from time import time
 import pygame as pg
+from time import sleep
+
 
 FPS = 60
 WIDTH = 1280
@@ -55,7 +57,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.y_increase = 0
 
-        if pressed[pg.K_UP]:
+        if pressed[pg.K_SPACE]:
             self.shoot = True
         else:
             self.shoot = False
@@ -92,7 +94,7 @@ class Player(pg.sprite.Sprite):
 
     def draw_hud(self):
         for hit in self.hits_ship:
-            self.health -= 5
+            self.health -= 10
 
         if 0 < self.health:
             pg.draw.rect(
@@ -179,7 +181,6 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.y = -self.rect.height
             self.rect.x = randint(0,WIDTH-self.rect.width)
 
-
     def update(self):
         if ((self.rect.y < -self.rect.height)
             or (self.rect.y > HEIGHT+self.rect.height)):
@@ -207,6 +208,7 @@ img = pg.image.load("pixelart/space.png").convert_alpha()
 bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
 bg_ctr = -HEIGHT
 
+
 def bg_move():
     global bg_ctr
     bg_ctr += 8
@@ -216,14 +218,25 @@ def bg_move():
         bg_ctr = -HEIGHT
 
 
+def game_over():
+    disp.blit(bg, (0, 0))
+    
+    text = pg.font.SysFont('Comic Sans MS', 200).render(
+        'GAME OVER', False, (255,255,255))
+    rect = text.get_rect()
+    disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
+    pg.display.flip()
+    sleep(2)
+    
+
 def spawn_astroids(blob_size):
     li = list(range(-5,0)) + list(range(1,6))
     for i in range(blob_size):
         asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
         sprites.add(asteroid)
         astroids.add(asteroid)
-    
 
+   
 player = Player(WIDTH//75, 5)
 sprites = pg.sprite.Group()
 astroids = pg.sprite.Group()
@@ -234,6 +247,8 @@ t_old = 0
 t_now = 0
 done = False
 clock = pg.time.Clock()
+
+
 while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
@@ -253,6 +268,10 @@ while not done:
     lasers.draw(disp)
     sprites.draw(disp)
     player.draw_hud()
+    if player.health <= 0:
+        game_over()
+        player.health = 100
+        player.score = 0
     pg.display.flip()
     clock.tick(FPS)
  
