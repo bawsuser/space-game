@@ -34,11 +34,11 @@ class Player(pg.sprite.Sprite):
         
     def control(self):
         pressed = pg.key.get_pressed()
-        if pressed[pg.K_q]:
+        if pressed[pg.K_LEFT]:
             self.angle_increase = self.angle_speed
-        elif pressed[pg.K_e]:
+        elif pressed[pg.K_RIGHT]:
             self.angle_increase = -self.angle_speed
-        elif not pressed[pg.K_q] or not pressed[pg.K_e]:
+        elif not pressed[pg.K_RIGHT] or not pressed[pg.K_LEFT]:
             self.angle_increase = 0
 
         if pressed[pg.K_a]:
@@ -55,7 +55,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.y_increase = 0
 
-        if pressed[pg.K_SPACE]:
+        if pressed[pg.K_UP]:
             self.shoot = True
         else:
             self.shoot = False
