@@ -29,7 +29,9 @@ class Player(pg.sprite.Sprite):
         self.t_now = self.shoot_d
         self.health = 100
         self.health_style = pg.font.SysFont('Comic Sans MS', 30)
-        self.health_surface = self.health_style.render('HEALTH', False, (255,255,255))
+        self.health_surface = self.health_style.render(
+            'HEALTH', False, (255,255,255))
+        self.hits = []
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -60,6 +62,7 @@ class Player(pg.sprite.Sprite):
             self.shoot = False
 
     def update(self):
+        self.hits = pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
         self.t_now = time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser(self.angle)
@@ -86,7 +89,7 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def draw_health(self):
-        for hit in ship_hits:
+        for hit in self.hits:
             self.health -= 5
 
         if 0 < self.health:
@@ -226,7 +229,6 @@ while not done:
         t_old = time()
         
     pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
-    ship_hits = pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
     lasers.update()
     sprites.update()
     lasers.draw(disp)
