@@ -104,9 +104,14 @@ class Player(pg.sprite.Sprite):
         for hit in self.hits_meteor:
             self.score += 5
 
-        score_surface = pg.font.SysFont('Comic Sans MS', 114).render(
-            "SCORE: " + str(self.score), False, (255,255,255))
-        disp.blit(score_surface,(WIDTH-450,30))
+        disp.blit(
+            pg.font.SysFont(
+                'Comic Sans MS', 114).render(
+                    ("SCORE: " + str(self.score)),
+                    False,
+                    (255,255,255)),
+                    (WIDTH-450,30)
+            )
 
 
 class Laser(pg.sprite.Sprite):
