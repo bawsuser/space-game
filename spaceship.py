@@ -1,8 +1,8 @@
 from random import randint
 from random import choice
+from time import sleep
 from time import time
 import pygame as pg
-from time import sleep
 
 
 FPS = 60
@@ -63,11 +63,18 @@ class Player(pg.sprite.Sprite):
             self.shoot = False
 
     def update(self):
+        if player.health <= 0:
+            game_over()
+            self.health = 100
+            self.score = 0
+            self.rect = self.orig.get_rect(center=self.disp_rect.center)
+        
         self.hits_ship = pg.sprite.spritecollide(
             player, astroids, True, pg.sprite.collide_mask)
         self.hits_meteor = pg.sprite.groupcollide(
             lasers, astroids, True, pg.sprite.collide_mask)
         self.t_now = time()
+        
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser(self.angle)
             laser.rect.centerx = self.rect.centerx
@@ -211,7 +218,7 @@ bg_ctr = -HEIGHT
 
 def bg_move():
     global bg_ctr
-    bg_ctr += 8
+    bg_ctr += 7
     disp.blit(bg, (0, bg_ctr-2*HEIGHT))
     disp.blit(bg, (0, bg_ctr))
     if bg_ctr >= HEIGHT:
@@ -267,11 +274,7 @@ while not done:
     sprites.update()
     lasers.draw(disp)
     sprites.draw(disp)
-    player.draw_hud()
-    if player.health <= 0:
-        game_over()
-        player.health = 100
-        player.score = 0
+    player.draw_hud()        
     pg.display.flip()
     clock.tick(FPS)
  
