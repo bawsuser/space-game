@@ -12,8 +12,8 @@ disp = pg.display.set_mode([WIDTH, HEIGHT])
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        self.orig = pg.transform.scale(
-            pg.image.load("pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
+        ship_img = pg.transform.scale(pg.image.load("pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
+        self.orig = ship_img
         self.image = self.orig
         self.disp_rect = disp.get_rect()
         self.rect = self.orig.get_rect(center=self.disp_rect.center)
@@ -35,7 +35,8 @@ class Player(pg.sprite.Sprite):
         self.hits_meteor = []
         self.score = 0
         self.score_style = pg.font.SysFont('Comic Sans MS', 114)
-        self.score_surface = self.score_style.render('0', False, (255,255,255))
+        self.score_surface = self.score_style.render(
+            '0', False, (255,255,255))
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -66,8 +67,10 @@ class Player(pg.sprite.Sprite):
             self.shoot = False
 
     def update(self):
-        self.hits_ship = pg.sprite.spritecollide(player, astroids, True, pg.sprite.collide_mask)
-        self.hits_meteor = pg.sprite.groupcollide(lasers, astroids, True, pg.sprite.collide_mask)
+        self.hits_ship = pg.sprite.spritecollide(
+            player, astroids, True, pg.sprite.collide_mask)
+        self.hits_meteor = pg.sprite.groupcollide(
+            lasers, astroids, True, pg.sprite.collide_mask)
         self.t_now = time()
         if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
             laser = Laser(self.angle)
@@ -98,7 +101,8 @@ class Player(pg.sprite.Sprite):
             self.health -= 5
 
         if 0 < self.health:
-            pg.draw.rect (disp, (255,255,255), [30,55,(WIDTH//300)*self.health,40])
+            pg.draw.rect(
+                disp, (255,255,255), [30,55,(WIDTH//300)*self.health,40])
 
         disp.blit(self.health_surface,(30,30))
         for hit in self.hits_meteor:
@@ -112,8 +116,9 @@ class Player(pg.sprite.Sprite):
 class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
         super().__init__()
-        self.image = pg.transform.scale(
+        laser_img = pg.transform.scale(
             pg.Surface([20, 20]), (WIDTH//100, WIDTH//100))
+        self.image = laser_img
         self.image.fill((0, 0, 255))
         self.rect = self.image.get_rect()
         self.angle = angle
@@ -147,8 +152,9 @@ class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
         x = WIDTH//randint(7,10)
-        self.orig = pg.transform.scale(
+        meteor_img = pg.transform.scale(
             pg.image.load("pixelart/meteor.png"), (x,x)).convert_alpha()
+        self.orig = meteor_img
         self.image = self.orig
         self.rect = self.orig.get_rect()
         self.speed = speed
@@ -173,9 +179,11 @@ class Asteroid(pg.sprite.Sprite):
 
 
     def update(self):
-        if self.rect.y < -self.rect.height or self.rect.y > HEIGHT+self.rect.height:
+        if ((self.rect.y < -self.rect.height)
+            or (self.rect.y > HEIGHT+self.rect.height)):
             self.kill()
-        elif self.rect.x < -self.rect.width or self.rect.x > WIDTH+self.rect.width:
+        elif ((self.rect.x < -self.rect.width) or
+              (self.rect.x > WIDTH+self.rect.width)):
             self.kill()
         
         if self.angle <= -360 or self.angle >= 360:
@@ -198,6 +206,7 @@ bg = pg.transform.scale(img, (WIDTH, HEIGHT))
 img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
 bg_mir = pg.transform.scale(img_mir, (WIDTH, HEIGHT))
 bg_ctr = 0
+
 def bg_move():
     global bg_ctr
     bg_ctr += 8
@@ -235,6 +244,7 @@ while not done:
     disp.fill((0,0,0))
     bg_move()
     t_now = time()
+    
     if t_now-t_old >= spawn_delay:
         spawn_astroids(1)
         t_old = time()
