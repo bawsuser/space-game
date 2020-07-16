@@ -28,15 +28,9 @@ class Player(pg.sprite.Sprite):
         self.t_old = 0
         self.t_now = self.shoot_d
         self.health = 100
-        self.health_style = pg.font.SysFont('Comic Sans MS', 30)
-        self.health_surface = self.health_style.render(
-            'HEALTH', False, (255,255,255))
         self.hits_ship = []
         self.hits_meteor = []
         self.score = 0
-        self.score_style = pg.font.SysFont('Comic Sans MS', 114)
-        self.score_surface = self.score_style.render(
-            '0', False, (255,255,255))
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -104,13 +98,15 @@ class Player(pg.sprite.Sprite):
             pg.draw.rect(
                 disp, (255,255,255), [30,55,(WIDTH//300)*self.health,40])
 
-        disp.blit(self.health_surface,(30,30))
+        disp.blit(
+            pg.font.SysFont('Comic Sans MS', 30).render(
+                'HEALTH', False, (255,255,255)),(30,30))
         for hit in self.hits_meteor:
             self.score += 5
 
-        self.score_surface = self.score_style.render(
+        score_surface = pg.font.SysFont('Comic Sans MS', 114).render(
             "SCORE: " + str(self.score), False, (255,255,255))
-        disp.blit(self.score_surface,(WIDTH-450,30))
+        disp.blit(score_surface,(WIDTH-450,30))
 
 
 class Laser(pg.sprite.Sprite):
