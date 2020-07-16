@@ -204,19 +204,16 @@ class Asteroid(pg.sprite.Sprite):
 
 
 img = pg.image.load("pixelart/space.png").convert_alpha()
-bg = pg.transform.scale(img, (WIDTH, HEIGHT))
-img_mir = pg.image.load("pixelart/space_mir.png").convert_alpha()
-bg_mir = pg.transform.scale(img_mir, (WIDTH, HEIGHT))
-bg_ctr = 0
+bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+bg_ctr = -HEIGHT
 
 def bg_move():
     global bg_ctr
     bg_ctr += 8
+    disp.blit(bg, (0, bg_ctr-2*HEIGHT))
     disp.blit(bg, (0, bg_ctr))
-    disp.blit(bg_mir, (0, bg_ctr-HEIGHT))
-    disp.blit(bg, (0, bg_ctr-(HEIGHT)*2))
-    if bg_ctr >= HEIGHT*2:
-        bg_ctr = 0
+    if bg_ctr >= HEIGHT:
+        bg_ctr = -HEIGHT
 
 
 def spawn_astroids(blob_size):
