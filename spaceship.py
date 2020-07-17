@@ -101,7 +101,7 @@ class Player(pg.sprite.Sprite):
 
     def draw_hud(self):
         for hit in self.hits_ship:
-            self.health -= 10
+            self.health -= 50
 
         if 0 < self.health:
             pg.draw.rect(
@@ -226,14 +226,14 @@ def bg_move():
 
 
 def game_over():
-    disp.blit(bg, (0, 0))
-    
-    text = pg.font.SysFont('Comic Sans MS', 200).render(
-        'GAME OVER', False, (255,255,255))
-    rect = text.get_rect()
-    disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
-    pg.display.flip()
-    sleep(2)
+    for i in range(255,0,-5):
+        disp.fill((i,0,0))
+        text = pg.font.SysFont('Comic Sans MS', 200).render(
+            'GAME OVER', False, (i,i,i))
+        rect = text.get_rect()
+        disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
+        pg.display.flip()
+        sleep(0.03)
     
 
 def spawn_astroids(blob_size):
