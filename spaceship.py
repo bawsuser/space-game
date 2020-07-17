@@ -235,6 +235,34 @@ def game_over():
         disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
         pg.display.flip()
         sleep(0.03)
+
+
+def menu():
+    global done
+    texts =["start game",
+              "resolution",
+              "end game",
+              "dummy",
+              "dummy"]
+
+    rects = []
+    
+    while not done:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                done = True
+                
+        bg_move()
+        for i in range(len(texts)):
+            text = pg.font.SysFont('Comic Sans MS', 100).render(
+                texts[i], False, (255,255,255))
+            rects.append(text.get_rect())
+            disp.blit(text,
+                      ((WIDTH - rects[i].width)//2,
+                       (HEIGHT - rects[i].height)//2 + i*110))
+
+        pg.display.flip()
+        clock.tick(FPS)
     
 
 def spawn_astroids(blob_size):
@@ -261,7 +289,8 @@ while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
                 done = True
-                    
+
+    menu()                
     player.control()
     disp.fill((0,0,0))
     bg_move()
