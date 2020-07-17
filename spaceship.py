@@ -240,27 +240,30 @@ def game_over():
 def menu():
     global done
     texts =["start game",
-              "resolution",
-              "end game",
-              "dummy",
-              "dummy"]
+            "resolution",
+            "end game"]
 
-    rects = []
-    
+    style = pg.font.SysFont('Comic Sans MS', 100)
+    white = (255,255,255)
+    space = 100
     while not done:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 done = True
                 
         bg_move()
+        max_height = 0
+        rects = []
         for i in range(len(texts)):
-            text = pg.font.SysFont('Comic Sans MS', 100).render(
-                texts[i], False, (255,255,255))
+            text = style.render(texts[i], False, white)
             rects.append(text.get_rect())
+            max_height += rects[i].height
+        for i in range(len(texts)):
+            text = style.render(texts[i], False, white)
             disp.blit(text,
                       ((WIDTH - rects[i].width)//2,
-                       (HEIGHT - rects[i].height)//2 + i*110))
-
+                       (HEIGHT - max_height - rects[0].height)//2 + i*space))
+            
         pg.display.flip()
         clock.tick(FPS)
     
