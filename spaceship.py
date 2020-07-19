@@ -242,9 +242,7 @@ def menu():
     style = pg.font.SysFont('Comic Sans MS', 100)
     white = (255,255,255)
     space = 100
-    texts =["start",
-            "screen",
-            "quit"]
+    texts =["start", "screen", "quit"]
 
     while not done:
         bg_move()
@@ -261,7 +259,8 @@ def menu():
                 text,
                 ((WIDTH - rects[i].width)//2,
                  i*space + (HEIGHT - max_height)//2))
-            
+
+        pg.draw.rect(disp,(255,255,255),rects[1])
         pg.display.flip()
         clock.tick(FPS)
     
