@@ -228,9 +228,10 @@ def bg_move():
 
 def game_over():
     for i in range(255,0,-5):
-        disp.fill((i,0,0))
+        disp.blit(bg, (0, 0))
         text = pg.font.SysFont('Comic Sans MS', 200).render(
-            'GAME OVER', False, (i,i,i))
+            'GAME OVER', False, (255,255,255))
+        text.set_alpha(i) 
         rect = text.get_rect()
         disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
         pg.display.flip()
@@ -241,9 +242,12 @@ def menu():
     global done
     style = pg.font.SysFont('Comic Sans MS', 100)
     white = (255,255,255)
+    blue = (0,0,255)
     space = 100
     texts =["start", "quit"]
     option = 0
+    alt = True
+    w = 200
 
     while not done:
         bg_move()
@@ -264,14 +268,24 @@ def menu():
         max_height = space*(len(texts))
         rects = []
         for i in range(len(texts)):
-            text = style.render(texts[i], False, (0,0,255))
+            text = style.render(texts[i], False, blue)
             rects.append(text.get_rect())
             disp.blit(
                 text,
                 ((WIDTH - rects[i].width)//2,
                  i*space + (HEIGHT - max_height)//2))
 
-        text = style.render(texts[option], False, white)
+        if alt == True:
+            w+=4
+        else:
+            w-=4
+        if w >= 250:
+            alt = False
+        if w <= 100:
+            alt = True
+        
+        text = style.render(texts[option], False, (255,255,255))
+        text.set_alpha(w)     
         disp.blit(
             text,
             ((WIDTH - rects[option].width)//2,
