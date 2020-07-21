@@ -243,25 +243,35 @@ def menu():
     white = (255,255,255)
     space = 100
     texts =["start", "screen", "quit"]
+    it = 0
 
     while not done:
         bg_move()
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 done = True
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_UP:
+                    it -= 1
+                elif event.key == pg.K_DOWN:
+                    it += 1
+
+        if it > 2:
+            it = 0
+        elif it < 0:
+            it = 2
                 
         max_height = space*(len(texts))
         rects = []
         for i in range(len(texts)):
-            text = style.render(texts[i], False, white)
+            text = style.render(texts[i], False, (0,0,255))
             rects.append(text.get_rect())
             disp.blit(
                 text,
                 ((WIDTH - rects[i].width)//2,
                  i*space + (HEIGHT - max_height)//2))
 
-        it = 0
-        text = style.render(texts[it], False, (0,0,255))
+        text = style.render(texts[it], False, white)
         disp.blit(
             text,
             ((WIDTH - rects[it].width)//2,
