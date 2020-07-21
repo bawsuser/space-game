@@ -260,7 +260,13 @@ def menu():
                 ((WIDTH - rects[i].width)//2,
                  i*space + (HEIGHT - max_height)//2))
 
-        pg.draw.rect(disp,(255,255,255),rects[1])
+        it = 0
+        text = style.render(texts[it], False, (0,0,255))
+        disp.blit(
+            text,
+            ((WIDTH - rects[it].width)//2,
+            it*space + (HEIGHT - max_height)//2))
+            
         pg.display.flip()
         clock.tick(FPS)
     
