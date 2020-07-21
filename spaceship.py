@@ -242,7 +242,7 @@ def menu():
     style = pg.font.SysFont('Comic Sans MS', 100)
     white = (255,255,255)
     space = 100
-    texts =["start", "screen", "quit"]
+    texts =["start", "quit"]
     option = 0
 
     while not done:
@@ -255,11 +255,11 @@ def menu():
                     option -= 1
                 elif event.key == pg.K_DOWN:
                     option += 1
-
-        if option > 2:
+                    
+        if option > len(texts)-1:
             option = 0
         elif option < 0:
-            option = 2
+            option = len(texts)-1
                 
         max_height = space*(len(texts))
         rects = []
