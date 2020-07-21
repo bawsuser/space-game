@@ -243,7 +243,7 @@ def menu():
     white = (255,255,255)
     space = 100
     texts =["start", "screen", "quit"]
-    it = 0
+    option = 0
 
     while not done:
         bg_move()
@@ -252,14 +252,14 @@ def menu():
                 done = True
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
-                    it -= 1
+                    option -= 1
                 elif event.key == pg.K_DOWN:
-                    it += 1
+                    option += 1
 
-        if it > 2:
-            it = 0
-        elif it < 0:
-            it = 2
+        if option > 2:
+            option = 0
+        elif option < 0:
+            option = 2
                 
         max_height = space*(len(texts))
         rects = []
@@ -271,11 +271,11 @@ def menu():
                 ((WIDTH - rects[i].width)//2,
                  i*space + (HEIGHT - max_height)//2))
 
-        text = style.render(texts[it], False, white)
+        text = style.render(texts[option], False, white)
         disp.blit(
             text,
-            ((WIDTH - rects[it].width)//2,
-            it*space + (HEIGHT - max_height)//2))
+            ((WIDTH - rects[option].width)//2,
+            option*space + (HEIGHT - max_height)//2))
             
         pg.display.flip()
         clock.tick(FPS)
