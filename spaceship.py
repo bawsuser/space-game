@@ -247,7 +247,8 @@ def menu():
     texts =["start", "quit"]
     option = 0
     alt = True
-    w = 200
+    alph = 100
+    blink_speed = 4
 
     while not done:
         bg_move()
@@ -257,13 +258,12 @@ def menu():
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
                     option -= 1
+                    if option < 0:
+                        option = len(texts)-1
                 elif event.key == pg.K_DOWN:
                     option += 1
-                    
-        if option > len(texts)-1:
-            option = 0
-        elif option < 0:
-            option = len(texts)-1
+                    if option > len(texts)-1:
+                        option = 0
                 
         max_height = space*(len(texts))
         rects = []
@@ -276,16 +276,16 @@ def menu():
                  i*space + (HEIGHT - max_height)//2))
 
         if alt == True:
-            w+=4
+            alph += blink_speed
+            if alph >= 250:
+                alt = False
         else:
-            w-=4
-        if w >= 250:
-            alt = False
-        if w <= 100:
-            alt = True
-        
+            alph -= blink_speed        
+            if alph <= 100:
+                alt = True
+                
         text = style.render(texts[option], False, (255,255,255))
-        text.set_alpha(w)     
+        text.set_alpha(alph)     
         disp.blit(
             text,
             ((WIDTH - rects[option].width)//2,
