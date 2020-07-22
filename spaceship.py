@@ -266,13 +266,12 @@ def menu():
                     option += 1
                     if option > len(texts)-1:
                         option = 0
-                elif event.key == pg.K_KP_ENTER:
-                    if texts[option] == texts[0]:
+                elif event.key == pg.K_RETURN:
+                    if texts[option] == "start":
                         finished = True
-                    if texts[option] == texts[1]:
+                    if texts[option] == "quit":
                         done = True
-                        finished = True
-                    
+                        finished = True   
                 
         max_height = space*(len(texts))
         rects = []
@@ -323,15 +322,14 @@ t_now = 0
 done = False
 clock = pg.time.Clock()
 
-
+menu()
 while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
                 done = True
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                #menu()
-                pass
+                menu()
                
     player.control()
     disp.fill((0,0,0))
