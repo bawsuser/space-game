@@ -227,12 +227,12 @@ def bg_move():
 
 
 def game_over():
-    for i in range(255,0,-5):
-        disp.blit(bg, (0, 0))
+    for i in range(250,0,-5):
         text = pg.font.SysFont('Comic Sans MS', 200).render(
             'GAME OVER', False, (255,255,255))
         text.set_alpha(i) 
         rect = text.get_rect()
+        disp.blit(bg, (0, 0))
         disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
         pg.display.flip()
         sleep(0.03)
@@ -240,20 +240,22 @@ def game_over():
 
 def menu():
     global done
+    finished = False
     style = pg.font.SysFont('Comic Sans MS', 100)
     white = (255,255,255)
     blue = (0,0,255)
     space = 100
-    texts =["start", "quit"]
+    texts = ["start", "quit"]
     option = 0
     alt = True
     alph = 100
     blink_speed = 4
 
-    while not done:
+    while not finished:
         bg_move()
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                finished = True
                 done = True
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
@@ -264,6 +266,13 @@ def menu():
                     option += 1
                     if option > len(texts)-1:
                         option = 0
+                elif event.key == pg.K_KP_ENTER:
+                    if texts[option] == texts[0]:
+                        finished = True
+                    if texts[option] == texts[1]:
+                        done = True
+                        finished = True
+                    
                 
         max_height = space*(len(texts))
         rects = []
@@ -290,7 +299,7 @@ def menu():
             text,
             ((WIDTH - rects[option].width)//2,
             option*space + (HEIGHT - max_height)//2))
-            
+        
         pg.display.flip()
         clock.tick(FPS)
     
@@ -319,8 +328,11 @@ while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
                 done = True
-
-    menu()                
+        elif event.type == pg.KEYDOWN:
+            if event.key == pg.K_ESCAPE:
+                #menu()
+                pass
+               
     player.control()
     disp.fill((0,0,0))
     bg_move()
