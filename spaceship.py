@@ -238,14 +238,13 @@ def game_over():
         sleep(0.03)
 
 
-def menu():
+def menu(texts):
     global done
     finished = False
     style = pg.font.SysFont('Comic Sans MS', 100)
     white = (255,255,255)
     blue = (0,0,255)
     space = 100
-    texts = ["start", "quit"]
     option = 0
     alt = True
     alph = 100
@@ -267,7 +266,8 @@ def menu():
                     if option > len(texts)-1:
                         option = 0
                 elif event.key == pg.K_RETURN:
-                    if texts[option] == "start":
+                    if (texts[option] == "start" or
+                        texts[option] =="resume"):
                         finished = True
                     if texts[option] == "quit":
                         done = True
@@ -322,14 +322,14 @@ t_now = 0
 done = False
 clock = pg.time.Clock()
 
-menu()
+menu(["start", "quit"])
 while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
                 done = True
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                menu()
+                menu(["resume", "quit"])
                
     player.control()
     disp.fill((0,0,0))
