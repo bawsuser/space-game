@@ -239,19 +239,42 @@ def game_over():
 
 
 def menu(texts):
-    global done
-    finished = False
     style = pg.font.SysFont('Comic Sans MS', 100)
     white = (255,255,255)
     blue = (0,0,255)
     space = 100
     option = 0
+    blink_speed = 4
+    rects = []
+    max_height = space*(len(texts))
     alt = True
     alph = 100
-    blink_speed = 4
+    finished = False
+    
+    def blink():
+        nonlocal alt
+        nonlocal alph
+        if alt == True:
+            alph += blink_speed
+            if alph >= 250:
+                alt = False
+        else:
+            alph -= blink_speed        
+            if alph <= 100:
+                alt = True
+                
+        text = style.render(texts[option], False, (255,255,255))
+        text.set_alpha(alph)     
+        disp.blit(
+            text,
+            ((WIDTH - rects[option].width)//2,
+            option*space + (HEIGHT - max_height)//2))
 
-    while not finished:
-        bg_move()
+    def control():
+        nonlocal option
+        nonlocal texts
+        nonlocal finished
+        global done
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 finished = True
@@ -271,10 +294,9 @@ def menu(texts):
                         finished = True
                     if texts[option] == "quit":
                         done = True
-                        finished = True   
-                
-        max_height = space*(len(texts))
-        rects = []
+                        finished = True
+
+    def draw_menu():
         for i in range(len(texts)):
             text = style.render(texts[i], False, blue)
             rects.append(text.get_rect())
@@ -283,22 +305,11 @@ def menu(texts):
                 ((WIDTH - rects[i].width)//2,
                  i*space + (HEIGHT - max_height)//2))
 
-        if alt == True:
-            alph += blink_speed
-            if alph >= 250:
-                alt = False
-        else:
-            alph -= blink_speed        
-            if alph <= 100:
-                alt = True
-                
-        text = style.render(texts[option], False, (255,255,255))
-        text.set_alpha(alph)     
-        disp.blit(
-            text,
-            ((WIDTH - rects[option].width)//2,
-            option*space + (HEIGHT - max_height)//2))
-        
+    while not finished:
+        bg_move()
+        control()
+        draw_menu()
+        blink()
         pg.display.flip()
         clock.tick(FPS)
     
