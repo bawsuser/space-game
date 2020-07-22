@@ -265,10 +265,8 @@ def menu(texts):
                 
         text = style.render(texts[option], False, (255,255,255))
         text.set_alpha(alph)     
-        disp.blit(
-            text,
-            ((WIDTH - rects[option].width)//2,
-            option*space + (HEIGHT - max_height)//2))
+        disp.blit(text, ((WIDTH - rects[option].width)//2,
+                         option*space + (HEIGHT - max_height)//2))
 
     def control():
         nonlocal option
@@ -300,16 +298,15 @@ def menu(texts):
         for i in range(len(texts)):
             text = style.render(texts[i], False, blue)
             rects.append(text.get_rect())
-            disp.blit(
-                text,
-                ((WIDTH - rects[i].width)//2,
-                 i*space + (HEIGHT - max_height)//2))
+            disp.blit(text, ((WIDTH - rects[i].width)//2,
+                             i*space + (HEIGHT - max_height)//2))
 
     while not finished:
         bg_move()
         control()
         draw_menu()
         blink()
+        rects = []
         pg.display.flip()
         clock.tick(FPS)
     
