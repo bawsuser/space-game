@@ -326,16 +326,14 @@ t_now = 0
 done = False
 clock = pg.time.Clock()
 
-x = menu(["start", "quit"])
-x.run()
+menu(["start", "quit"]).run()
 while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
                 done = True
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                y = menu(["resume", "quit"])
-                y.run()
+                menu(["resume", "quit"]).run()
                
     player.control()
     disp.fill((0,0,0))
