@@ -212,6 +212,75 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.y += self.side_move
 
 
+class menu():
+    def __init__(self, texts):
+        self.style = pg.font.SysFont('Comic Sans MS', 100)
+        self.space = 100
+        self.option = 0
+        self.blink_speed = 4
+        self.rects = []
+        self.max_height = self.space*(len(texts))
+        self.alt = True
+        self.alph = 100
+        self.finished = False
+        self.texts = texts
+
+    def draw_menu(self):
+        for i in range(len(self.texts)):
+            text = self.style.render(self.texts[i], False, (0,0,255))
+            self.rects.append(text.get_rect())
+            disp.blit(text, ((WIDTH - self.rects[i].width)//2,
+                             i*self.space + (HEIGHT - self.max_height)//2))
+
+    def blink(self):
+        if self.alt == True:
+            self.alph += self.blink_speed
+            if self.alph >= 250:
+                self.alt = False
+        else:
+            self.alph -= self.blink_speed        
+            if self.alph <= 100:
+                self.alt = True
+                
+        text = self.style.render(self.texts[self.option], False, (255,255,255))
+        text.set_alpha(self.alph)     
+        disp.blit(text, ((WIDTH - self.rects[self.option].width)//2,
+                         self.option*self.space + (HEIGHT - self.max_height)//2))
+
+    def control(self):
+        global done
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.finished = True
+                done = True
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_UP:
+                    self.option -= 1
+                    if self.option < 0:
+                        self.option = len(self.texts)-1
+                elif event.key == pg.K_DOWN:
+                    self.option += 1
+                    if self.option > len(self.texts)-1:
+                        self.option = 0
+                elif event.key == pg.K_RETURN:
+                    if (self.texts[self.option] == "start" or
+                        self.texts[self.option] =="resume"):
+                        self.finished = True
+                    if self.texts[self.option] == "quit":
+                        done = True
+                        self.finished = True
+
+    def run(self):
+        while not self.finished:
+            bg_move()
+            self.control()
+            self.draw_menu()
+            self.blink()
+            rects = []
+            pg.display.flip()
+            clock.tick(FPS)
+
+
 img = pg.image.load("pixelart/space.png").convert_alpha()
 bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
 bg_ctr = -HEIGHT
@@ -236,79 +305,6 @@ def game_over():
         disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
         pg.display.flip()
         sleep(0.03)
-
-
-def menu(texts):
-    style = pg.font.SysFont('Comic Sans MS', 100)
-    white = (255,255,255)
-    blue = (0,0,255)
-    space = 100
-    option = 0
-    blink_speed = 4
-    rects = []
-    max_height = space*(len(texts))
-    alt = True
-    alph = 100
-    finished = False
-    
-    def blink():
-        nonlocal alt
-        nonlocal alph
-        if alt == True:
-            alph += blink_speed
-            if alph >= 250:
-                alt = False
-        else:
-            alph -= blink_speed        
-            if alph <= 100:
-                alt = True
-                
-        text = style.render(texts[option], False, (255,255,255))
-        text.set_alpha(alph)     
-        disp.blit(text, ((WIDTH - rects[option].width)//2,
-                         option*space + (HEIGHT - max_height)//2))
-
-    def control():
-        nonlocal option
-        nonlocal texts
-        nonlocal finished
-        global done
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                finished = True
-                done = True
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_UP:
-                    option -= 1
-                    if option < 0:
-                        option = len(texts)-1
-                elif event.key == pg.K_DOWN:
-                    option += 1
-                    if option > len(texts)-1:
-                        option = 0
-                elif event.key == pg.K_RETURN:
-                    if (texts[option] == "start" or
-                        texts[option] =="resume"):
-                        finished = True
-                    if texts[option] == "quit":
-                        done = True
-                        finished = True
-
-    def draw_menu():
-        for i in range(len(texts)):
-            text = style.render(texts[i], False, blue)
-            rects.append(text.get_rect())
-            disp.blit(text, ((WIDTH - rects[i].width)//2,
-                             i*space + (HEIGHT - max_height)//2))
-
-    while not finished:
-        bg_move()
-        control()
-        draw_menu()
-        blink()
-        rects = []
-        pg.display.flip()
-        clock.tick(FPS)
     
 
 def spawn_astroids(blob_size):
@@ -330,14 +326,16 @@ t_now = 0
 done = False
 clock = pg.time.Clock()
 
-menu(["start", "quit"])
+x = menu(["start", "quit"])
+x.run()
 while not done:
     for event in pg.event.get():
         if event.type == pg.QUIT: 
                 done = True
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                menu(["resume", "quit"])
+                y = menu(["resume", "quit"])
+                y.run()
                
     player.control()
     disp.fill((0,0,0))
