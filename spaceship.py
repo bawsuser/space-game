@@ -246,6 +246,7 @@ class menu():
         text.set_alpha(self.alph)     
         disp.blit(text, ((WIDTH - self.rects[self.option].width)//2,
                          self.option*self.space + (HEIGHT - self.max_height)//2))
+        rects = []
 
     def control(self):
         global done
@@ -264,7 +265,7 @@ class menu():
                         self.option = 0
                 elif event.key == pg.K_RETURN:
                     if (self.texts[self.option] == "start" or
-                        self.texts[self.option] =="resume"):
+                        self.texts[self.option] == "resume"):
                         self.finished = True
                     if self.texts[self.option] == "quit":
                         done = True
@@ -276,7 +277,6 @@ class menu():
             self.control()
             self.draw_menu()
             self.blink()
-            rects = []
             pg.display.flip()
             clock.tick(FPS)
 
