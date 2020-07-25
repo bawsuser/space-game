@@ -6,11 +6,7 @@ import pygame as pg
 import math
 
 
-FPS = 60
-WIDTH = 1280
-HEIGHT = 720
-pg.init()
-disp = pg.display.set_mode([WIDTH, HEIGHT])
+
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -275,11 +271,6 @@ class menu():
             self.draw_menu()
             pg.display.flip()
             clock.tick(FPS)
-    
-
-img = pg.image.load("pixelart/space.png").convert_alpha()
-bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
-bg_ctr = -HEIGHT
 
 
 def bg_move():
@@ -310,7 +301,15 @@ def spawn_astroids(blob_size):
         sprites.add(asteroid)
         astroids.add(asteroid)
 
-   
+
+FPS = 60
+WIDTH = 1280
+HEIGHT = 720
+pg.init()
+disp = pg.display.set_mode([WIDTH, HEIGHT])
+img = pg.image.load("pixelart/space.png").convert_alpha()
+bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+bg_ctr = -HEIGHT  
 player = Player(WIDTH//75, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
