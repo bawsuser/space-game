@@ -217,7 +217,6 @@ class menu():
         self.texts = texts
         self.space = 100
         self.max_height = self.space*(len(texts))
-        self.style = pg.font.SysFont('Comic Sans MS', 100)
         self.option = 0
         self.alt = True
         self.opacity = 100
@@ -226,22 +225,21 @@ class menu():
     def draw_menu(self):
         bg_move()
         rects = []
-        text_surf = lambda i,c: self.style.render(self.texts[i], False, c)
+        style = pg.font.SysFont('Comic Sans MS', 100)
         center_text = lambda x: ((WIDTH - rects[x].width)//2,
-                                x*self.space + (HEIGHT - self.max_height)//2)
+                                 x*self.space + (HEIGHT - self.max_height)//2)
     
         for i in range(len(self.texts)):
-            text = text_surf(i, (0,0,255))
+            text = style.render(self.texts[i], False, (0,0,255))
             rects.append(text.get_rect())
             if self.option != i:
                 disp.blit(text, center_text(i))
 
-        text_bg = text_surf(self.option, (255,255,0))
-        text = text_surf(self.option, (255,255,255))
+        text_bg = style.render(self.texts[self.option], False, (255,255,0))
+        text = style.render(self.texts[self.option], False, (255,255,255))
         text.set_alpha(self.opacity)       
         disp.blit(text_bg, center_text(self.option))
         disp.blit(text, center_text(self.option))
-
         blink_speed = 4
         if self.alt == True:
             self.opacity += blink_speed
