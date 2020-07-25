@@ -102,7 +102,7 @@ class Player(pg.sprite.Sprite):
 
     def draw_hud(self):
         for hit in self.hits_ship:
-            self.health -= 50
+            self.health -= 10
 
         if 0 < self.health:
             pg.draw.rect(
