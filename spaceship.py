@@ -3,6 +3,7 @@ from random import choice
 from time import sleep
 from time import time
 import pygame as pg
+import math
 
 
 FPS = 60
@@ -146,18 +147,8 @@ class Laser(pg.sprite.Sprite):
         if self.angle < 0:
             self.angle += 360
             
-        if 0 <= self.angle <= 90:
-            self.rect.y -= self.speed*(90-self.angle)//90 
-            self.rect.x -= self.speed*self.angle//90
-        elif 90 <= self.angle <= 180:
-            self.rect.y += self.speed*(self.angle-90)//90 
-            self.rect.x -= self.speed*(180-self.angle)//90
-        elif 180 <= self.angle <= 270:
-            self.rect.y += self.speed*(90-(self.angle-180))//90 
-            self.rect.x += self.speed*(self.angle-180)//90
-        elif 270 <= self.angle <= 360:
-            self.rect.y -= self.speed*(self.angle-270)//90 
-            self.rect.x += self.speed*(90-(self.angle-270))//90        
+        self.rect.y -= int(self.speed*math.cos(math.radians(self.angle)))
+        self.rect.x -= int(self.speed*math.sin(math.radians(self.angle)))       
 
 
 class Asteroid(pg.sprite.Sprite):
