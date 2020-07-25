@@ -226,11 +226,21 @@ class menu():
     def draw_menu(self):
         bg_move()
         rects = []
+        text_surf = lambda i,c: self.style.render(self.texts[i], False, c)
+        center_text = lambda x: ((WIDTH - rects[x].width)//2,
+                                x*self.space + (HEIGHT - self.max_height)//2)
+    
         for i in range(len(self.texts)):
-            text = self.style.render(self.texts[i], False, (0,0,255))
+            text = text_surf(i, (0,0,255))
             rects.append(text.get_rect())
-            disp.blit(text, ((WIDTH - rects[i].width)//2,
-                             i*self.space + (HEIGHT - self.max_height)//2))
+            if self.option != i:
+                disp.blit(text, center_text(i))
+
+        text_bg = text_surf(self.option, (255,255,0))
+        text = text_surf(self.option, (255,255,255))
+        text.set_alpha(self.opacity)       
+        disp.blit(text_bg, center_text(self.option))
+        disp.blit(text, center_text(self.option))
 
         blink_speed = 4
         if self.alt == True:
@@ -241,23 +251,19 @@ class menu():
             self.opacity -= blink_speed        
             if self.opacity <= 100:
                 self.alt = True
-                
-        text = self.style.render(self.texts[self.option], False, (255,255,255))
-        text.set_alpha(self.opacity)     
-        disp.blit(text, ((WIDTH - rects[self.option].width)//2,
-                         self.option*self.space + (HEIGHT - self.max_height)//2))
 
     def control(self):
+        global done
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                self.finished = True
                 done = True
+                self.finished = True
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_UP:
+                if event.key == pg.K_w:
                     self.option -= 1
                     if self.option < 0:
                         self.option = len(self.texts)-1
-                elif event.key == pg.K_DOWN:
+                elif event.key == pg.K_s:
                     self.option += 1
                     if self.option > len(self.texts)-1:
                         self.option = 0
