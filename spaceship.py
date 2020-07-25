@@ -64,14 +64,16 @@ class Player(pg.sprite.Sprite):
             self.shoot = False
 
     def update(self):
-        if player.health <= 0:
+        if self.health <= 0:
             game_over()
             self.health = 100
             self.score = 0
+            self.angle = 0
             self.rect = self.orig.get_rect(center=self.disp_rect.center)
+            
         
         self.hits_ship = pg.sprite.spritecollide(
-            player, astroids, True, pg.sprite.collide_mask)
+            self, astroids, True, pg.sprite.collide_mask)
         self.hits_meteor = pg.sprite.groupcollide(
             lasers, astroids, True, pg.sprite.collide_mask)
         self.t_now = time()
@@ -311,9 +313,9 @@ def spawn_astroids(blob_size):
    
 player = Player(WIDTH//75, 5)
 sprites = pg.sprite.Group()
+sprites.add(player)
 astroids = pg.sprite.Group()
 lasers = pg.sprite.Group()
-sprites.add(player)
 spawn_delay = 1
 t_old = 0
 t_now = 0
