@@ -27,13 +27,7 @@ class Player(pg.sprite.Sprite):
         self.angle_increase = 0
         self.angle = 0
         self.shoot = False
-        self.shoot_d = 0.2
-        self.t_old = 0
-        self.t_now = self.shoot_d
         self.health = 100
-        self.hits_ship = []
-        self.hits_meteor = []
-        self.score = 0
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -63,19 +57,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.shoot = False
 
-    def update(self):        
-        self.hits_ship = pg.sprite.spritecollide(
-            self, astroids, True, pg.sprite.collide_mask)
-        self.hits_meteor = pg.sprite.groupcollide(
-            lasers, astroids, True, pg.sprite.collide_mask)
-        self.t_now = time()
-        
-        if self.shoot == True and self.t_now-self.t_old >= self.shoot_d:
-            laser = Laser(self.angle)
-            laser.rect.centerx = self.rect.centerx
-            laser.rect.bottom = self.rect.centery
-            self.t_old = time()
-                    
+    def update(self):                         
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
             
@@ -94,31 +76,6 @@ class Player(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def draw_hud(self):
-        for hit in self.hits_ship:
-            self.health -= 50
-
-        if 0 < self.health:
-            pg.draw.rect(
-                disp, (255,255,255), [30,55,(WIDTH//300)*self.health,40])
-
-        disp.blit(
-            pg.font.SysFont('Comic Sans MS', 30).render(
-                'HEALTH', False, (255,255,255)),(30,30))
-        
-        for hit in self.hits_meteor:
-            self.score += 5
-
-        text = pg.font.SysFont(
-            'Comic Sans MS', 114).render(
-                ("SCORE: " + str(self.score)),
-                False,
-                (255,255,255))
-
-        rect = text.get_rect()
-
-        disp.blit(text,(WIDTH-rect.width-30, 30))
-
 
 class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
@@ -130,7 +87,6 @@ class Laser(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.angle = angle
         self.speed = WIDTH//40
-        lasers.add(self)
  
     def update(self):
         if self.rect.y < 0 or self.rect.y > HEIGHT:
@@ -286,6 +242,12 @@ class Bg_move():
 
 class Game():
     def __init__(self):
+        self.shoot_d = 0.2
+        self.shoot_t_old = 0
+        self.shoot_t_now = self.shoot_d
+        self.hits_ship = []
+        self.hits_meteor = []
+        self.score = 0
         self.spawn_delay = 1
         self.t_old = 0
         self.t_now = 0
@@ -293,6 +255,8 @@ class Game():
         self.sprites = pg.sprite.Group()
         self.sprites.add(self.player)
         self.bg = Bg_move()
+        self.astroids = pg.sprite.Group()
+        self.lasers = pg.sprite.Group()
         
     def run(self):
         global done
@@ -302,28 +266,26 @@ class Game():
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     Menu(["resume", "quit"]).run()
-                   
+
+        disp.fill((0,0,0))
+        self.bg.run()                   
         self.player.control()
         if self.player.health <= 0:
             self.game_over()
-            self.player.health = 100
-            self.player.score = 0
-            self.player.angle = 0
-            self.player.rect = self.player.orig.get_rect(center=self.player.disp_rect.center)
-            
-        disp.fill((0,0,0))
-        self.bg.run()
-        self.t_now = time()
         
+        self.t_now = time()        
         if self.t_now - self.t_old >= self.spawn_delay:
             self.spawn_astroids(1)
             self.t_old = time()
+
             
-        lasers.update()
-        self.sprites.update()
-        lasers.draw(disp)
+        self.collisions()        
+        self.shoot()
+        self.lasers.update()
+        self.sprites.update()         
+        self.lasers.draw(disp)
         self.sprites.draw(disp)
-        self.player.draw_hud()        
+        self.draw_hud()
         pg.display.flip()
         clock.tick(FPS)
 
@@ -332,11 +294,33 @@ class Game():
         for i in range(blob_size):
             asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
             self.sprites.add(asteroid)
-            astroids.add(asteroid)
-        
+            self.astroids.add(asteroid)
+
+    def collisions(self):
+        self.hits_ship = pg.sprite.spritecollide(
+            self.player, self.astroids, True, pg.sprite.collide_mask)
+        self.hits_meteor = pg.sprite.groupcollide(
+            self.lasers, self.astroids, True, pg.sprite.collide_mask)
+
+    def shoot(self):
+        self.shoot_t_now = time()        
+        if ((self.player.shoot == True) and
+            (self.shoot_t_now - self.shoot_t_old >= self.shoot_d)):
+            laser = Laser(self.player.angle)
+            self.lasers.add(laser)
+            laser.rect.centerx = self.player.rect.centerx
+            laser.rect.bottom = self.player.rect.centery
+            self.shoot_t_old = time()
+
     def game_over(self):
         img = pg.image.load("pixelart/space.png").convert_alpha()
         bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+        self.player.health = 100
+        self.score = 0
+        self.player.angle = 0
+        self.player.rect = self.player.orig.get_rect(
+            center=self.player.disp_rect.center)
+        
         for i in range(250,0,-5):
             text = pg.font.SysFont('Comic Sans MS', 200).render(
                 'GAME OVER', False, (255,255,255))
@@ -347,12 +331,33 @@ class Game():
             pg.display.flip()
             sleep(0.03)
 
+    def draw_hud(self):
+        for hit in self.hits_ship:
+            self.player.health -= 50
+
+        if 0 < self.player.health:
+            pg.draw.rect(
+                disp, (255,255,255), [30,55,(WIDTH//300)*self.player.health,40])
+
+        disp.blit(
+            pg.font.SysFont('Comic Sans MS', 30).render(
+                'HEALTH', False, (255,255,255)),(30,30))
+        
+        for hit in self.hits_meteor:
+            self.score += 5
+
+        text = pg.font.SysFont(
+            'Comic Sans MS', 114).render(
+                ("SCORE: " + str(self.score)),
+                False,
+                (255,255,255))
+
+        rect = text.get_rect()
+        disp.blit(text,(WIDTH-rect.width-30, 30))
+
 
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
-
-astroids = pg.sprite.Group()
-lasers = pg.sprite.Group()
 done = False
 Menu(["start", "quit"]).run()
 game = Game()
