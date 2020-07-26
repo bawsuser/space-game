@@ -9,6 +9,7 @@ import math
 FPS = 60
 WIDTH = 1280
 HEIGHT = 720
+clock = pg.time.Clock()
 
  
 class Player(pg.sprite.Sprite):
@@ -62,15 +63,7 @@ class Player(pg.sprite.Sprite):
         else:
             self.shoot = False
 
-    def update(self):
-        if self.health <= 0:
-            game_over()
-            self.health = 100
-            self.score = 0
-            self.angle = 0
-            self.rect = self.orig.get_rect(center=self.disp_rect.center)
-            
-        
+    def update(self):        
         self.hits_ship = pg.sprite.spritecollide(
             self, astroids, True, pg.sprite.collide_mask)
         self.hits_meteor = pg.sprite.groupcollide(
@@ -296,6 +289,10 @@ class Game():
         self.spawn_delay = 1
         self.t_old = 0
         self.t_now = 0
+        self.player = Player(WIDTH//75, 5)
+        self.sprites = pg.sprite.Group()
+        self.sprites.add(self.player)
+        self.bg = Bg_move()
         
     def run(self):
         global done
@@ -306,9 +303,16 @@ class Game():
                 if event.key == pg.K_ESCAPE:
                     Menu(["resume", "quit"]).run()
                    
-        player.control()
+        self.player.control()
+        if self.player.health <= 0:
+            self.game_over()
+            self.player.health = 100
+            self.player.score = 0
+            self.player.angle = 0
+            self.player.rect = self.player.orig.get_rect(center=self.player.disp_rect.center)
+            
         disp.fill((0,0,0))
-        bg.run()
+        self.bg.run()
         self.t_now = time()
         
         if self.t_now - self.t_old >= self.spawn_delay:
@@ -316,10 +320,10 @@ class Game():
             self.t_old = time()
             
         lasers.update()
-        sprites.update()
+        self.sprites.update()
         lasers.draw(disp)
-        sprites.draw(disp)
-        player.draw_hud()        
+        self.sprites.draw(disp)
+        self.player.draw_hud()        
         pg.display.flip()
         clock.tick(FPS)
 
@@ -327,35 +331,30 @@ class Game():
         li = list(range(-5,0)) + list(range(1,6))
         for i in range(blob_size):
             asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
-            sprites.add(asteroid)
+            self.sprites.add(asteroid)
             astroids.add(asteroid)
         
-
-def game_over():
-    img = pg.image.load("pixelart/space.png").convert_alpha()
-    bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
-    for i in range(250,0,-5):
-        text = pg.font.SysFont('Comic Sans MS', 200).render(
-            'GAME OVER', False, (255,255,255))
-        text.set_alpha(i) 
-        rect = text.get_rect()
-        disp.blit(bg, (0, 0))
-        disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
-        pg.display.flip()
-        sleep(0.03)
+    def game_over(self):
+        img = pg.image.load("pixelart/space.png").convert_alpha()
+        bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+        for i in range(250,0,-5):
+            text = pg.font.SysFont('Comic Sans MS', 200).render(
+                'GAME OVER', False, (255,255,255))
+            text.set_alpha(i) 
+            rect = text.get_rect()
+            disp.blit(bg, (0, 0))
+            disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
+            pg.display.flip()
+            sleep(0.03)
 
 
 pg.init()
-disp = pg.display.set_mode([WIDTH, HEIGHT]) 
-player = Player(WIDTH//75, 5)
-sprites = pg.sprite.Group()
-sprites.add(player)
+disp = pg.display.set_mode([WIDTH, HEIGHT])
+
 astroids = pg.sprite.Group()
 lasers = pg.sprite.Group()
 done = False
-clock = pg.time.Clock()
 Menu(["start", "quit"]).run()
-bg = Bg_move()
 game = Game()
 while not done:
     game.run()
