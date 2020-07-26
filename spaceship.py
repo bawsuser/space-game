@@ -6,6 +6,9 @@ import pygame as pg
 import math
 
 
+FPS = 60
+WIDTH = 1280
+HEIGHT = 720
 
  
 class Player(pg.sprite.Sprite):
@@ -100,7 +103,7 @@ class Player(pg.sprite.Sprite):
 
     def draw_hud(self):
         for hit in self.hits_ship:
-            self.health -= 10
+            self.health -= 50
 
         if 0 < self.health:
             pg.draw.rect(
@@ -201,7 +204,7 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.y += self.side_move
 
 
-class menu():
+class Menu():
     def __init__(self, texts):
         self.texts = texts
         self.space = 100
@@ -210,9 +213,10 @@ class menu():
         self.alt = True
         self.opacity = 100
         self.finished = False
+        self.bg = Bg_move()
 
     def draw_menu(self):
-        bg_move()
+        self.bg.run()
         rects = []
         style = pg.font.SysFont('Comic Sans MS', 100)
         center_text = lambda x: ((WIDTH - rects[x].width)//2,
@@ -273,16 +277,63 @@ class menu():
             clock.tick(FPS)
 
 
-def bg_move():
-    global bg_ctr
-    bg_ctr += 7
-    disp.blit(bg, (0, bg_ctr-2*HEIGHT))
-    disp.blit(bg, (0, bg_ctr))
-    if bg_ctr >= HEIGHT:
-        bg_ctr = -HEIGHT
+class Bg_move():
+    def __init__(self):
+        self.bg_ctr = -HEIGHT
+        img = pg.image.load("pixelart/space.png").convert_alpha()
+        self.bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+        
+    def run(self):
+        self.bg_ctr += 7
+        disp.blit(self.bg, (0, self.bg_ctr-2*HEIGHT))
+        disp.blit(self.bg, (0, self.bg_ctr))
+        if self.bg_ctr >= HEIGHT:
+            self.bg_ctr = -HEIGHT
 
+
+class Game():
+    def __init__(self):
+        self.spawn_delay = 1
+        self.t_old = 0
+        self.t_now = 0
+        
+    def run(self):
+        global done
+        for event in pg.event.get():
+            if event.type == pg.QUIT: 
+                    done = True
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    Menu(["resume", "quit"]).run()
+                   
+        player.control()
+        disp.fill((0,0,0))
+        bg.run()
+        self.t_now = time()
+        
+        if self.t_now - self.t_old >= self.spawn_delay:
+            self.spawn_astroids(1)
+            self.t_old = time()
+            
+        lasers.update()
+        sprites.update()
+        lasers.draw(disp)
+        sprites.draw(disp)
+        player.draw_hud()        
+        pg.display.flip()
+        clock.tick(FPS)
+
+    def spawn_astroids(self, blob_size):
+        li = list(range(-5,0)) + list(range(1,6))
+        for i in range(blob_size):
+            asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
+            sprites.add(asteroid)
+            astroids.add(asteroid)
+        
 
 def game_over():
+    img = pg.image.load("pixelart/space.png").convert_alpha()
+    bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
     for i in range(250,0,-5):
         text = pg.font.SysFont('Comic Sans MS', 200).render(
             'GAME OVER', False, (255,255,255))
@@ -292,59 +343,21 @@ def game_over():
         disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
         pg.display.flip()
         sleep(0.03)
-    
-
-def spawn_astroids(blob_size):
-    li = list(range(-5,0)) + list(range(1,6))
-    for i in range(blob_size):
-        asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
-        sprites.add(asteroid)
-        astroids.add(asteroid)
 
 
-FPS = 60
-WIDTH = 1280
-HEIGHT = 720
 pg.init()
-disp = pg.display.set_mode([WIDTH, HEIGHT])
-img = pg.image.load("pixelart/space.png").convert_alpha()
-bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
-bg_ctr = -HEIGHT  
+disp = pg.display.set_mode([WIDTH, HEIGHT]) 
 player = Player(WIDTH//75, 5)
 sprites = pg.sprite.Group()
 sprites.add(player)
 astroids = pg.sprite.Group()
 lasers = pg.sprite.Group()
-spawn_delay = 1
-t_old = 0
-t_now = 0
 done = False
 clock = pg.time.Clock()
-
-menu(["start", "quit"]).run()
+Menu(["start", "quit"]).run()
+bg = Bg_move()
+game = Game()
 while not done:
-    for event in pg.event.get():
-        if event.type == pg.QUIT: 
-                done = True
-        elif event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
-                menu(["resume", "quit"]).run()
-               
-    player.control()
-    disp.fill((0,0,0))
-    bg_move()
-    t_now = time()
-    
-    if t_now-t_old >= spawn_delay:
-        spawn_astroids(1)
-        t_old = time()
-        
-    lasers.update()
-    sprites.update()
-    lasers.draw(disp)
-    sprites.draw(disp)
-    player.draw_hud()        
-    pg.display.flip()
-    clock.tick(FPS)
+    game.run()
  
 pg.quit()
