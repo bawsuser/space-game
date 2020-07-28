@@ -168,8 +168,9 @@ class Menu():
         self.option = 0
         self.alt = True
         self.opacity = 100
-        self.finished = False
         self.bg = Bg_move()
+        self.finished = False
+        self.done = False
 
     def draw_menu(self):
         self.bg.run()
@@ -200,10 +201,9 @@ class Menu():
                 self.alt = True
 
     def control(self):
-        global done
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                done = True
+                self.done = True
                 self.finished = True
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_w:
@@ -218,11 +218,10 @@ class Menu():
                     self.behaviour()
 
     def behaviour(self):
-        global done
         if self.texts[self.option] == self.texts[0]:
             self.finished = True
         if self.texts[self.option] == self.texts[1]:
-            done = True
+            self.done = True
             self.finished = True
 
     def run(self):
@@ -231,6 +230,8 @@ class Menu():
             self.draw_menu()
             pg.display.flip()
             clock.tick(FPS)
+            
+        return self.done
 
 
 class Bg_move():
@@ -261,6 +262,7 @@ class Game():
         self.bg = Bg_move()
         self.astroids = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
+        self.done = False
 
     def spawn_astroids(self, blob_size):
         li = list(range(-5,0)) + list(range(1,6))
@@ -319,15 +321,14 @@ class Game():
             sleep(0.03)
 
     def run(self):
-        global done
-        Menu(["start", "quit"]).run()
-        while not done:
+        self.done = Menu(["start", "quit"]).run()
+        while not self.done:
             for event in pg.event.get():
                 if event.type == pg.QUIT: 
-                        done = True
+                        self.done = True
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
-                        Menu(["resume", "quit"]).run()
+                        self.done = Menu(["resume", "quit"]).run()
               
             if self.player.health <= 0:
                 self.game_over()
@@ -358,7 +359,6 @@ FPS = 60
 WIDTH = 1280
 HEIGHT = 720
 clock = pg.time.Clock()
-done = False
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 Game().run()
