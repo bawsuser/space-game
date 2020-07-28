@@ -336,14 +336,15 @@ class Game():
             if self.t_now - self.t_old >= self.spawn_delay:
                 self.spawn_astroids(1)
                 self.t_old = time()
+
+            laser = self.player.shoot_laser()
+            if laser != None:
+                self.lasers.add(laser)
                 
             self.player.control()
             disp.fill((0,0,0))
             self.bg.run()     
             self.collisions()        
-            laser = self.player.shoot_laser()
-            if laser != None:
-                self.lasers.add(laser)
             self.lasers.update()
             self.sprites.update()         
             self.lasers.draw(disp)
