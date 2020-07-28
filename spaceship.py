@@ -4,13 +4,6 @@ from time import sleep
 from time import time
 import pygame as pg
 import math
-
-
-FPS = 60
-WIDTH = 1280
-HEIGHT = 720
-clock = pg.time.Clock()
-
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -259,33 +252,35 @@ class Game():
         
     def run(self):
         global done
-        for event in pg.event.get():
-            if event.type == pg.QUIT: 
-                    done = True
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
-                    Menu(["resume", "quit"]).run()
+        Menu(["start", "quit"]).run()
+        while not done:
+            for event in pg.event.get():
+                if event.type == pg.QUIT: 
+                        done = True
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        Menu(["resume", "quit"]).run()
 
-        disp.fill((0,0,0))
-        self.bg.run()                   
-        self.player.control()
-        if self.player.health <= 0:
-            self.game_over()
-        
-        self.t_now = time()        
-        if self.t_now - self.t_old >= self.spawn_delay:
-            self.spawn_astroids(1)
-            self.t_old = time()
+            disp.fill((0,0,0))
+            self.bg.run()                   
+            self.player.control()
+            if self.player.health <= 0:
+                self.game_over()
+            
+            self.t_now = time()        
+            if self.t_now - self.t_old >= self.spawn_delay:
+                self.spawn_astroids(1)
+                self.t_old = time()
 
-        self.collisions()        
-        self.shoot()
-        self.lasers.update()
-        self.sprites.update()         
-        self.lasers.draw(disp)
-        self.sprites.draw(disp)
-        self.draw_hud()
-        pg.display.flip()
-        clock.tick(FPS)
+            self.collisions()        
+            self.shoot()
+            self.lasers.update()
+            self.sprites.update()         
+            self.lasers.draw(disp)
+            self.sprites.draw(disp)
+            self.draw_hud()
+            pg.display.flip()
+            clock.tick(FPS)
 
     def shoot(self):
         self.shoot_t_now = time()        
@@ -354,12 +349,12 @@ class Game():
             sleep(0.03)
 
 
+FPS = 60
+WIDTH = 1280
+HEIGHT = 720
+clock = pg.time.Clock()
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 done = False
-Menu(["start", "quit"]).run()
-game = Game()
-while not done:
-    game.run()
- 
+Game().run()
 pg.quit()
