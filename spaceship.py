@@ -21,6 +21,9 @@ class Player(pg.sprite.Sprite):
         self.angle = 0
         self.shoot = False
         self.health = 100
+        self.shoot_d = 0.2
+        self.shoot_t_old = 0
+        self.shoot_t_now = self.shoot_d
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -49,6 +52,18 @@ class Player(pg.sprite.Sprite):
             self.shoot = True
         else:
             self.shoot = False
+
+    def shoot_laser(self):
+        self.shoot_t_now = time()        
+        if ((self.shoot == True) and
+            (self.shoot_t_now - self.shoot_t_old >= self.shoot_d)):
+            laser = Laser(self.angle)
+            laser.rect.centerx = self.rect.centerx
+            laser.rect.bottom = self.rect.centery
+            self.shoot_t_old = time()
+            return laser
+        else:
+            return None
 
     def update(self):                         
         if self.angle <= -360 or self.angle >= 360:
@@ -234,9 +249,6 @@ class Bg_move():
 
 class Game():
     def __init__(self):
-        self.shoot_d = 0.2
-        self.shoot_t_old = 0
-        self.shoot_t_now = self.shoot_d
         self.hits_ship = []
         self.hits_meteor = []
         self.score = 0
@@ -249,48 +261,6 @@ class Game():
         self.bg = Bg_move()
         self.astroids = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
-        
-    def run(self):
-        global done
-        Menu(["start", "quit"]).run()
-        while not done:
-            for event in pg.event.get():
-                if event.type == pg.QUIT: 
-                        done = True
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
-                        Menu(["resume", "quit"]).run()
-
-            disp.fill((0,0,0))
-            self.bg.run()                   
-            self.player.control()
-            if self.player.health <= 0:
-                self.game_over()
-            
-            self.t_now = time()        
-            if self.t_now - self.t_old >= self.spawn_delay:
-                self.spawn_astroids(1)
-                self.t_old = time()
-
-            self.collisions()        
-            self.shoot()
-            self.lasers.update()
-            self.sprites.update()         
-            self.lasers.draw(disp)
-            self.sprites.draw(disp)
-            self.draw_hud()
-            pg.display.flip()
-            clock.tick(FPS)
-
-    def shoot(self):
-        self.shoot_t_now = time()        
-        if ((self.player.shoot == True) and
-            (self.shoot_t_now - self.shoot_t_old >= self.shoot_d)):
-            laser = Laser(self.player.angle)
-            self.lasers.add(laser)
-            laser.rect.centerx = self.player.rect.centerx
-            laser.rect.bottom = self.player.rect.centery
-            self.shoot_t_old = time()
 
     def spawn_astroids(self, blob_size):
         li = list(range(-5,0)) + list(range(1,6))
@@ -348,13 +318,47 @@ class Game():
             pg.display.flip()
             sleep(0.03)
 
+    def run(self):
+        global done
+        Menu(["start", "quit"]).run()
+        while not done:
+            for event in pg.event.get():
+                if event.type == pg.QUIT: 
+                        done = True
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        Menu(["resume", "quit"]).run()
+              
+            if self.player.health <= 0:
+                self.game_over()
+            
+            self.t_now = time()        
+            if self.t_now - self.t_old >= self.spawn_delay:
+                self.spawn_astroids(1)
+                self.t_old = time()
+                
+            self.player.control()
+            disp.fill((0,0,0))
+            self.bg.run()     
+            self.collisions()        
+            laser = self.player.shoot_laser()
+            if laser != None:
+                self.lasers.add(laser)
+            self.lasers.update()
+            self.sprites.update()         
+            self.lasers.draw(disp)
+            self.sprites.draw(disp)
+            self.draw_hud()
+            pg.display.flip()
+            clock.tick(FPS)
+
 
 FPS = 60
 WIDTH = 1280
 HEIGHT = 720
 clock = pg.time.Clock()
+done = False
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
-done = False
 Game().run()
 pg.quit()
