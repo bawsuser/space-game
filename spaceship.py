@@ -91,7 +91,7 @@ class Laser(pg.sprite.Sprite):
         laser_img = pg.transform.scale(
             pg.Surface([20, 20]), (WIDTH//100, WIDTH//100))
         self.image = laser_img
-        self.image.fill((0, 0, 255))
+        self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
         self.angle = angle
         self.speed = WIDTH//40
@@ -107,7 +107,7 @@ class Laser(pg.sprite.Sprite):
             
         self.rect.y -= int(self.speed*math.cos(math.radians(self.angle)))
         self.rect.x -= int(self.speed*math.sin(math.radians(self.angle)))       
-
+            
 
 class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -248,6 +248,23 @@ class Bg_move():
             self.bg_ctr = -HEIGHT
 
 
+class Powerup(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        speed2_img = pg.transform.scale(
+            pg.image.load("pixelart/speed2.png"), (WIDTH//10, WIDTH//10)).convert_alpha()
+        self.image = speed2_img
+        self.rect = self.image.get_rect()
+        self.rect.x = randint(0,WIDTH -self.rect.width)
+        self.rect.y = -self.rect.height
+        self.speed = WIDTH//100
+
+    def update(self):
+        self.rect.y += self.speed
+        if self.rect.y < -self.rect.height or self.rect.y > HEIGHT:
+            self.kill()      
+
+
 class Game():
     def __init__(self):
         self.hits_ship = []
@@ -262,27 +279,43 @@ class Game():
         self.bg = Bg_move()
         self.astroids = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
+        self.powerups = pg.sprite.Group()
+        self.pu_ac = 0
+        self.pu_c = 0
         self.done = False
-
-    def spawn_astroids(self, blob_size):
-        li = list(range(-5,0)) + list(range(1,6))
-        for i in range(blob_size):
-            asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
-            self.sprites.add(asteroid)
-            self.astroids.add(asteroid)
+        self.count = False
+        self.orig_shoot_speed = self.player.shoot_d
 
     def collisions(self):
         self.hits_ship = pg.sprite.spritecollide(
             self.player, self.astroids, True, pg.sprite.collide_mask)
+
+        for hit in self.hits_ship:
+            self.player.health -= 10
         
         self.hits_meteor = pg.sprite.groupcollide(
             self.lasers, self.astroids, True, pg.sprite.collide_mask)
-        
-        for hit in self.hits_ship:
-            self.player.health -= 50
-            
+
         for hit in self.hits_meteor:
             self.score += 5
+
+        hit_powerup = pg.sprite.spritecollide(
+            self.player, self.powerups, True, pg.sprite.collide_mask)
+        
+        if hit_powerup:
+            self.count = True
+            self.player.shoot_d = self.player.shoot_d/2
+            self.pu_c = time()
+
+        if self.count == True:
+            self.pu_ac = time()
+            
+        if self.pu_ac - self.pu_c >= 1:
+            self.count = False
+            self.pu_ac = 0
+            self.pu_c = 0
+            self.player.shoot_d = self.orig_shoot_speed
+            
 
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
@@ -320,6 +353,18 @@ class Game():
             pg.display.flip()
             sleep(0.03)
 
+    def spawn_astroids(self, blob_size):
+        li = list(range(-5,0)) + list(range(1,6))
+        for i in range(blob_size):
+            asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
+            self.sprites.add(asteroid)
+            self.astroids.add(asteroid)
+
+    def spawn_powerups(self):
+        powerup = Powerup()
+        self.sprites.add(powerup)
+        self.powerups.add(powerup)
+
     def run(self):
         self.done = Menu(["start", "quit"]).run()
         while not self.done:
@@ -338,10 +383,13 @@ class Game():
                 self.spawn_astroids(1)
                 self.t_old = time()
 
+            if randint(0,100) == 1:
+                self.spawn_powerups()
+
             laser = self.player.shoot_laser()
             if laser != None:
                 self.lasers.add(laser)
-                
+            
             self.player.control()
             disp.fill((0,0,0))
             self.bg.run()     
