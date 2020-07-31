@@ -112,7 +112,8 @@ class Laser(pg.sprite.Sprite):
 class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        x = WIDTH//randint(7,10)
+        self.size = randint(7,9)
+        x = WIDTH//self.size
         meteor_img = pg.transform.scale(
             pg.image.load("pixelart/meteor.png"), (x,x)).convert_alpha()
         self.orig = meteor_img
@@ -267,55 +268,63 @@ class Powerup(pg.sprite.Sprite):
 
 class Game():
     def __init__(self):
-        self.hits_ship = []
-        self.hits_meteor = []
         self.score = 0
         self.spawn_delay = 1
         self.t_old = 0
         self.t_now = 0
-        self.player = Player(WIDTH//75, 5)
-        self.sprites = pg.sprite.Group()
-        self.sprites.add(self.player)
-        self.bg = Bg_move()
-        self.astroids = pg.sprite.Group()
-        self.lasers = pg.sprite.Group()
-        self.powerups = pg.sprite.Group()
         self.pu_ac = 0
         self.pu_c = 0
+        self.sprites = pg.sprite.Group()
+        self.player = Player(WIDTH//75, 5)
+        self.sprites.add(self.player)
+        self.bg = Bg_move()
+        self.astroids_s = pg.sprite.Group()
+        self.astroids_m = pg.sprite.Group()
+        self.astroids_l = pg.sprite.Group()
+        self.lasers = pg.sprite.Group()
+        self.powerups = pg.sprite.Group()
         self.done = False
         self.count = False
         self.orig_shoot_speed = self.player.shoot_d
 
     def collisions(self):
-        self.hits_ship = pg.sprite.spritecollide(
-            self.player, self.astroids, True, pg.sprite.collide_mask)
+        def hits_ship(group, damage):
+            hits_ship = pg.sprite.spritecollide(
+                self.player, group, True, pg.sprite.collide_mask)
+            for hit in hits_ship:
+                self.player.health -= damage
 
-        for hit in self.hits_ship:
-            self.player.health -= 10
+        def hits_meteor(group, points):
+            hits_meteor = pg.sprite.groupcollide(
+                self.lasers, group, True, pg.sprite.collide_mask)
+            for hit in hits_meteor:
+                self.score += points
+
+        def hit_pu(runtime):
+            hit_powerup = pg.sprite.spritecollide(
+                self.player, self.powerups, True, pg.sprite.collide_mask)
         
-        self.hits_meteor = pg.sprite.groupcollide(
-            self.lasers, self.astroids, True, pg.sprite.collide_mask)
+            if hit_powerup:
+                self.count = True
+                self.player.shoot_d = self.player.shoot_d/2
+                self.pu_c = time()
 
-        for hit in self.hits_meteor:
-            self.score += 5
+            if self.count == True:
+                self.pu_ac = time()
+                
+            if self.pu_ac - self.pu_c >= runtime:
+                self.count = False
+                self.pu_ac = 0
+                self.pu_c = 0
+                self.player.shoot_d = self.orig_shoot_speed
 
-        hit_powerup = pg.sprite.spritecollide(
-            self.player, self.powerups, True, pg.sprite.collide_mask)
-        
-        if hit_powerup:
-            self.count = True
-            self.player.shoot_d = self.player.shoot_d/2
-            self.pu_c = time()
-
-        if self.count == True:
-            self.pu_ac = time()
-            
-        if self.pu_ac - self.pu_c >= 1:
-            self.count = False
-            self.pu_ac = 0
-            self.pu_c = 0
-            self.player.shoot_d = self.orig_shoot_speed
-            
+        hits_ship(self.astroids_s,5)
+        hits_ship(self.astroids_m,10)
+        hits_ship(self.astroids_l,15)
+        hits_meteor(self.astroids_s,5)
+        hits_meteor(self.astroids_m,10)
+        hits_meteor(self.astroids_l,15)
+        hit_pu(3)
 
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
@@ -358,12 +367,18 @@ class Game():
         for i in range(blob_size):
             asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
             self.sprites.add(asteroid)
-            self.astroids.add(asteroid)
+            if asteroid.size == 7:
+                self.astroids_l.add(asteroid)
+            elif asteroid.size == 8:
+                self.astroids_m.add(asteroid)
+            else:
+                self.astroids_s.add(asteroid)
 
     def spawn_powerups(self):
-        powerup = Powerup()
-        self.sprites.add(powerup)
-        self.powerups.add(powerup)
+        if randint(0,300) == 1:
+            powerup = Powerup()
+            self.sprites.add(powerup)
+            self.powerups.add(powerup)
 
     def run(self):
         self.done = Menu(["start", "quit"]).run()
@@ -383,14 +398,12 @@ class Game():
                 self.spawn_astroids(1)
                 self.t_old = time()
 
-            if randint(0,100) == 1:
-                self.spawn_powerups()
-
             laser = self.player.shoot_laser()
             if laser != None:
                 self.lasers.add(laser)
-            
-            self.player.control()
+
+            self.player.control()    
+            self.spawn_powerups()
             disp.fill((0,0,0))
             self.bg.run()     
             self.collisions()        
