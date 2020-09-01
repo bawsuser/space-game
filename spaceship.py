@@ -1,7 +1,5 @@
-from random import randint
-from random import choice
-from time import sleep
-from time import time
+from random import randint, choice
+from time import sleep, time
 import pygame as pg
 import math
  
@@ -161,7 +159,7 @@ class Asteroid(pg.sprite.Sprite):
             self.rect.y += self.side_move
 
 
-class Menu():
+class Menu:
     def __init__(self, texts):
         self.texts = texts
         self.space = 100
@@ -235,7 +233,7 @@ class Menu():
         return self.done
 
 
-class Bg_move():
+class Bg_move:
     def __init__(self):
         self.bg_ctr = -HEIGHT
         img = pg.image.load("pixelart/space.png").convert_alpha()
@@ -266,7 +264,7 @@ class Powerup(pg.sprite.Sprite):
             self.kill()      
 
 
-class Game():
+class Game:
     def __init__(self):
         self.score = 0
         self.spawn_delay = 1
@@ -423,4 +421,4 @@ clock = pg.time.Clock()
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 Game().run()
-pg.quit()
+pg.quit() 
