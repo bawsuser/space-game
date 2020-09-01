@@ -11,17 +11,23 @@ class Player(pg.sprite.Sprite):
         self.image = self.orig
         self.disp_rect = disp.get_rect()
         self.rect = self.orig.get_rect(center=self.disp_rect.center)
+        self.health = 100
+
+        # axis move attr
         self.speed = speed
         self.x_increase = 0
         self.y_increase = 0
+
+        #angle move attr
         self.angle_speed = angle_speed
         self.angle_increase = 0
         self.angle = 0
+
+        # shoot attr
         self.shoot = False
-        self.health = 100
         self.shoot_d = 0.2
         self.shoot_t_old = 0
-        self.shoot_t_now = self.shoot_d
+        self.shoot_t_now = self.shoot_d 
         
     def control(self):
         pressed = pg.key.get_pressed()
@@ -80,17 +86,18 @@ class Player(pg.sprite.Sprite):
         self.rect.centery += self.y_increase
         self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        self.rect = self.image.get_rect(center=self.rect.center) 
 
 
 class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
         super().__init__()
-        laser_img = pg.transform.scale(
+        self.image = pg.transform.scale(
             pg.Surface([20, 20]), (WIDTH//100, WIDTH//100))
-        self.image = laser_img
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
+
+        # move attr
         self.angle = angle
         self.speed = WIDTH//40
  
@@ -112,16 +119,18 @@ class Asteroid(pg.sprite.Sprite):
         super().__init__()
         self.size = randint(7,9)
         x = WIDTH//self.size
-        meteor_img = pg.transform.scale(
+        self.orig = pg.transform.scale(
             pg.image.load("pixelart/meteor.png"), (x,x)).convert_alpha()
-        self.orig = meteor_img
         self.image = self.orig
         self.rect = self.orig.get_rect()
+
+        # move attr
         self.speed = speed
         self.angle_speed = angle_speed
         self.angle = 0
         self.r = randint(1,4)
         self.side_move = randint(-5,5)
+
         if 1 == self.r:
             self.rect.x = -self.rect.width
             self.rect.y = randint(0,HEIGHT-self.rect.height)
@@ -250,9 +259,8 @@ class Bg_move:
 class Powerup(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        speed2_img = pg.transform.scale(
+        self.image = pg.transform.scale(
             pg.image.load("pixelart/speed2.png"), (WIDTH//10, WIDTH//10)).convert_alpha()
-        self.image = speed2_img
         self.rect = self.image.get_rect()
         self.rect.x = randint(0,WIDTH -self.rect.width)
         self.rect.y = -self.rect.height
