@@ -276,10 +276,7 @@ class Game:
     def __init__(self):
         # timer attributes
         self.t_asteroid_was_spawned = 0
-        self.t_past_asteroid_spawned = 0
         self.time_at_pu_col = 0
-        self.past_time_apu_col = 0
-        self.count = False
        
         # some game objs
         self.player = Player(WIDTH//75, 5)
@@ -297,7 +294,6 @@ class Game:
         self.asteroid_spawn_delay = 1
         self.sprites.add(self.player)
         self.close_game = False
-        self.orig_shoot_speed = self.player.shoot_d
 
     def collisions(self):
         def hits_ship(group, damage):
@@ -316,19 +312,14 @@ class Game:
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.powerups, True, pg.sprite.collide_mask)
         
-            if hit_powerup:
-                self.count = True
+            if hit_powerup and self.time_at_pu_col == 0:
                 self.player.shoot_d = self.player.shoot_d/2
                 self.time_at_pu_col = time()
 
-            if self.count == True:
-                self.past_time_apu_col = time()
-                
-            if self.past_time_apu_col - self.time_at_pu_col >= runtime:
-                self.count = False
+            if time() > time() - self.time_at_pu_col >= runtime:
                 self.past_time_apu_col = 0
                 self.time_at_pu_col = 0
-                self.player.shoot_d = self.orig_shoot_speed
+                self.player.shoot_d = self.player.shoot_d*2 
 
         hits_ship(self.astroids_s,5)
         hits_ship(self.astroids_m,10)
@@ -337,6 +328,12 @@ class Game:
         hits_meteor(self.astroids_m,10)
         hits_meteor(self.astroids_l,15)
         hit_pu(3)
+
+    def spawn_powerups(self):
+        if randint(0,300) == 1:
+            powerup = Powerup()
+            self.sprites.add(powerup)
+            self.powerups.add(powerup)
 
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
@@ -386,12 +383,6 @@ class Game:
             else:
                 self.astroids_s.add(asteroid)
 
-    def spawn_powerups(self):
-        if randint(0,300) == 1:
-            powerup = Powerup()
-            self.sprites.add(powerup)
-            self.powerups.add(powerup)
-
     def run(self):
         self.close_game = Menu(["start", "quit"]).run()
         while not self.close_game:
@@ -405,8 +396,7 @@ class Game:
             if self.player.health <= 0:
                 self.game_over()
             
-            self.t_past_asteroid_spawned = time()        
-            if self.t_past_asteroid_spawned - self.t_asteroid_was_spawned >= self.asteroid_spawn_delay:
+            if time() - self.t_asteroid_was_spawned >= self.asteroid_spawn_delay:
                 self.spawn_astroids(1)
                 self.t_asteroid_was_spawned = time()
 
