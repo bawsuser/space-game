@@ -257,10 +257,11 @@ class Bg_move:
 
 
 class Powerup(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, img = "pixelart/speed2.png"):
         super().__init__()
+        self.img = img
         self.image = pg.transform.scale(
-            pg.image.load("pixelart/speed2.png"), (WIDTH//10, WIDTH//10)).convert_alpha()
+            pg.image.load(img), (WIDTH//10, WIDTH//10)).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = randint(0,WIDTH -self.rect.width)
         self.rect.y = -self.rect.height
@@ -286,14 +287,23 @@ class Game:
         self.astroids_s = pg.sprite.Group()
         self.astroids_m = pg.sprite.Group()
         self.astroids_l = pg.sprite.Group()
-        self.powerups = pg.sprite.Group()
         self.sprites = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
-       
+        self.health_pu = pg.sprite.Group()
+        self.shoot2_pu = pg.sprite.Group()
+        self.shield_pu = pg.sprite.Group()
+        self.speed2_pu = pg.sprite.Group()        
+
         self.score = 0
         self.asteroid_spawn_delay = 1
         self.sprites.add(self.player)
         self.close_game = False
+        self.pu_list= [
+            "pixelart/2shoot.png",
+            "pixelart/shield.png",
+            "pixelart/health.png",
+            "pixelart/speed2.png"
+            ]
 
     def collisions(self):
         def hits_ship(group, damage):
@@ -308,18 +318,35 @@ class Game:
             for hit in hits_meteor:
                 self.score += points
 
-        def hit_pu(runtime):
+        def hit_health_pu(rt = 3):
             hit_powerup = pg.sprite.spritecollide(
-                self.player, self.powerups, True, pg.sprite.collide_mask)
+                self.player, self.health_pu, True, pg.sprite.collide_mask)
+
+            if hit_powerup:
+                if self.player.health + 10 > 100:
+                    self.player.health = 100
+                else:
+                    self.player.health += 10
+ 
+        def hit_shoot2_pu(rt = 3):
+            pass
+	
+        def hit_shield_pu(rt = 3):
+            pass
+
+        def hit_speed2_pu(rt = 3):
+            hit_powerup = pg.sprite.spritecollide(
+                self.player, self.speed2_pu, True, pg.sprite.collide_mask)
         
             if hit_powerup and self.time_at_pu_col == 0:
                 self.player.shoot_d = self.player.shoot_d/2
                 self.time_at_pu_col = time()
 
-            if time() > time() - self.time_at_pu_col >= runtime:
+            if time() > time() - self.time_at_pu_col >= rt:
                 self.past_time_apu_col = 0
                 self.time_at_pu_col = 0
                 self.player.shoot_d = self.player.shoot_d*2 
+
 
         hits_ship(self.astroids_s,5)
         hits_ship(self.astroids_m,10)
@@ -327,14 +354,24 @@ class Game:
         hits_meteor(self.astroids_s,5)
         hits_meteor(self.astroids_m,10)
         hits_meteor(self.astroids_l,15)
-        hit_pu(3)
+        hit_health_pu()
+        hit_shoot2_pu()
+        hit_shield_pu()
+        hit_speed2_pu()
 
     def spawn_powerups(self):
         if randint(0,300) == 1:
-            powerup = Powerup()
+            powerup = Powerup(choice(self.pu_list))
             self.sprites.add(powerup)
-            self.powerups.add(powerup)
-
+            if("health" in powerup.img):
+                self.health_pu.add(powerup)
+            elif("shield" in powerup.img):
+                self.shield_pu.add(powerup)
+            elif("2shoot" in powerup.img):
+                self.shoot2_pu.add(powerup)
+            else:
+                self.speed2_pu.add(powerup)
+ 
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
             'HEALTH', False, (255,255,255)),(30,30))
