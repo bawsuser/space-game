@@ -2,6 +2,7 @@ from random import randint, choice
 from time import sleep, time
 import pygame as pg
 import math
+import pygame.gfxdraw
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -273,11 +274,30 @@ class Powerup(pg.sprite.Sprite):
             self.kill()      
 
 
+class Shield(pg.sprite.Sprite):
+    def __init__(self, player_obj):
+        super().__init__()       
+        self.player = player_obj
+        circle_img = pg.Surface((WIDTH//5,WIDTH//5), pg.SRCALPHA)
+        w = (circle_img.get_width() // 2)
+        pg.gfxdraw.filled_circle(circle_img, w, w, WIDTH//10, (0,0,255,150))
+        self.image = circle_img 
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.rect.centerx = self.player.rect.centerx
+        self.rect.centery = self.player.rect.centery
+
+    def kill_shield(self):
+        self.kill()
+
+
 class Game:
     def __init__(self):
         # timer attributes
         self.t_asteroid_was_spawned = 0
-        self.time_at_pu_col = 0
+        self.time_speed2_col = 0
+        self.time_shield_col = 0
        
         # some game objs
         self.player = Player(WIDTH//75, 5)
@@ -294,6 +314,7 @@ class Game:
         self.shield_pu = pg.sprite.Group()
         self.speed2_pu = pg.sprite.Group()        
 
+        self.shield = None
         self.score = 0
         self.asteroid_spawn_delay = 1
         self.sprites.add(self.player)
@@ -315,10 +336,17 @@ class Game:
         def hits_meteor(group, points):
             hits_meteor = pg.sprite.groupcollide(
                 self.lasers, group, True, pg.sprite.collide_mask)
+
+            if self.shield != None:
+                hits_shield = pg.sprite.spritecollide(
+                    self.shield, group, True)
+                for hit in hits_shield:
+                    self.score += points
+
             for hit in hits_meteor:
                 self.score += points
-
-        def hit_health_pu(rt = 3):
+            
+        def hit_health_pu():
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.health_pu, True, pg.sprite.collide_mask)
 
@@ -331,20 +359,30 @@ class Game:
         def hit_shoot2_pu(rt = 3):
             pass
 	
-        def hit_shield_pu(rt = 3):
-            pass
+        def hit_shield_pu(rt = 10):
+            hit_powerup = pg.sprite.spritecollide(
+                self.player, self.shield_pu, True, pg.sprite.collide_mask)
+        
+            if hit_powerup and self.time_shield_col == 0:
+                self.shield = Shield(self.player)
+                self.sprites.add(self.shield)
+                self.time_shield_col = time()
+
+            if time() > time() - self.time_shield_col >= rt:
+                self.shield.kill_shield()
+                self.shield = None
+                self.time_shield_col = 0
 
         def hit_speed2_pu(rt = 3):
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.speed2_pu, True, pg.sprite.collide_mask)
         
-            if hit_powerup and self.time_at_pu_col == 0:
+            if hit_powerup and self.time_speed2_col == 0:
                 self.player.shoot_d = self.player.shoot_d/2
-                self.time_at_pu_col = time()
+                self.time_speed2_col = time()
 
-            if time() > time() - self.time_at_pu_col >= rt:
-                self.past_time_apu_col = 0
-                self.time_at_pu_col = 0
+            if time() > time() - self.time_speed2_col >= rt:
+                self.time_speed2_col = 0
                 self.player.shoot_d = self.player.shoot_d*2 
 
 
