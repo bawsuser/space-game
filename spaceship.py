@@ -310,7 +310,6 @@ class Game:
         self.sprites = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
         self.health_pu = pg.sprite.Group()
-        self.shoot2_pu = pg.sprite.Group()
         self.shield_pu = pg.sprite.Group()
         self.speed2_pu = pg.sprite.Group()        
 
@@ -320,7 +319,6 @@ class Game:
         self.sprites.add(self.player)
         self.close_game = False
         self.pu_list= [
-            "pixelart/2shoot.png",
             "pixelart/shield.png",
             "pixelart/health.png",
             "pixelart/speed2.png"
@@ -356,9 +354,6 @@ class Game:
                 else:
                     self.player.health += 10
  
-        def hit_shoot2_pu(rt = 3):
-            pass
-	
         def hit_shield_pu(rt = 10):
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.shield_pu, True, pg.sprite.collide_mask)
@@ -393,7 +388,6 @@ class Game:
         hits_meteor(self.astroids_m,10)
         hits_meteor(self.astroids_l,15)
         hit_health_pu()
-        hit_shoot2_pu()
         hit_shield_pu()
         hit_speed2_pu()
 
@@ -405,8 +399,6 @@ class Game:
                 self.health_pu.add(powerup)
             elif("shield" in powerup.img):
                 self.shield_pu.add(powerup)
-            elif("2shoot" in powerup.img):
-                self.shoot2_pu.add(powerup)
             else:
                 self.speed2_pu.add(powerup)
  
