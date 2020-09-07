@@ -281,8 +281,9 @@ class Shield(pg.sprite.Sprite):
         self.player = player_obj
         circle_img = pg.Surface((WIDTH//5,WIDTH//5), pg.SRCALPHA)
         w = (circle_img.get_width() // 2)
-        # transparency under 190 raises no collision bug
-        pg.gfxdraw.filled_circle(circle_img, w, w, WIDTH//10, (255,255,255,190))
+        pg.gfxdraw.filled_circle(circle_img, w, w, WIDTH//10, (255,255,255,150))
+        # aacircle fixes collision bug
+        pg.gfxdraw.aacircle(circle_img, w, w, WIDTH//10, (0,0,0))
         self.image = circle_img 
         self.rect = self.image.get_rect()
 
