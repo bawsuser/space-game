@@ -274,13 +274,15 @@ class Powerup(pg.sprite.Sprite):
             self.kill()      
 
 
+
 class Shield(pg.sprite.Sprite):
     def __init__(self, player_obj):
         super().__init__()       
         self.player = player_obj
         circle_img = pg.Surface((WIDTH//5,WIDTH//5), pg.SRCALPHA)
         w = (circle_img.get_width() // 2)
-        pg.gfxdraw.filled_circle(circle_img, w, w, WIDTH//10, (0,0,255,150))
+        # transparency under 190 raises no collision bug
+        pg.gfxdraw.filled_circle(circle_img, w, w, WIDTH//10, (255,255,255,190))
         self.image = circle_img 
         self.rect = self.image.get_rect()
 
@@ -337,7 +339,7 @@ class Game:
 
             if self.shield != None:
                 hits_shield = pg.sprite.spritecollide(
-                    self.shield, group, True)
+                    self.shield, group, True, pg.sprite.collide_mask)
                 for hit in hits_shield:
                     self.score += points
 
@@ -392,7 +394,7 @@ class Game:
         hit_speed2_pu()
 
     def spawn_powerups(self):
-        if randint(0,300) == 1:
+        if randint(0,100) == 1:
             powerup = Powerup(choice(self.pu_list))
             self.sprites.add(powerup)
             if("health" in powerup.img):
