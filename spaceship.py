@@ -318,6 +318,7 @@ class Game:
 
         self.shield = None
         self.score = 0
+        self.old_score = 0
         self.asteroid_spawn_delay = 1
         self.sprites.add(self.player)
         self.close_game = False
@@ -395,7 +396,7 @@ class Game:
         hit_speed2_pu()
 
     def spawn_powerups(self):
-        if randint(0,100) == 1:
+        if randint(0, PU_CHANCE) == 1:
             powerup = Powerup(choice(self.pu_list))
             self.sprites.add(powerup)
             if("health" in powerup.img):
@@ -425,12 +426,22 @@ class Game:
     def game_over(self):
         img = pg.image.load("pixelart/space.png").convert_alpha()
         bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+        self.asteroid_spawn_delay = 1
         self.player.health = 100
         self.score = 0
         self.player.angle = 0
         self.player.rect = self.player.orig.get_rect(
             center=self.player.disp_rect.center)
-        
+        self.astroids_s.empty() 
+        self.astroids_m.empty()
+        self.astroids_l.empty()
+        self.lasers.empty()
+        self.health_pu.empty()
+        self.shield_pu.empty()
+        self.speed2_pu.empty()
+        self.sprites.empty()
+        self.sprites.add(self.player)
+       
         for i in range(250,0,-5):
             text = pg.font.SysFont('Comic Sans MS', 200).render(
                 'GAME OVER', False, (255,255,255))
@@ -466,6 +477,11 @@ class Game:
             if self.player.health <= 0:
                 self.game_over()
             
+            if self.score > self.old_score + DIFFICULTY_SCORE_BARRIER:
+                self.old_score = self.score
+                fac = ASTEROID_SPAWN_FACTOR * ASTEROID_SPAWN_FACTOR
+                self.asteroid_spawn_delay = self.asteroid_spawn_delay * fac 
+
             if time() - self.t_asteroid_was_spawned >= self.asteroid_spawn_delay:
                 self.spawn_astroids(1)
                 self.t_asteroid_was_spawned = time()
@@ -488,6 +504,9 @@ class Game:
             clock.tick(FPS)
 
 
+ASTEROID_SPAWN_FACTOR = 0.99
+DIFFICULTY_SCORE_BARRIER = 100 
+PU_CHANCE = 300
 FPS = 60
 WIDTH = 1280
 HEIGHT = 720
