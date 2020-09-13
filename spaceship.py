@@ -29,7 +29,7 @@ class Player(pg.sprite.Sprite):
         self.shoot_d = 0.2
         self.shoot_t_old = 0
         self.shoot_t_now = self.shoot_d 
-        
+
     def control(self):
         pressed = pg.key.get_pressed()
         if pressed[pg.K_LEFT]:
@@ -59,7 +59,7 @@ class Player(pg.sprite.Sprite):
             self.shoot = False
 
     def shoot_laser(self):
-        self.shoot_t_now = time()        
+        self.shoot_t_now = time()
         if ((self.shoot == True) and
             (self.shoot_t_now - self.shoot_t_old >= self.shoot_d)):
             laser = Laser(self.angle)
@@ -70,10 +70,10 @@ class Player(pg.sprite.Sprite):
         else:
             return None
 
-    def update(self):                         
+    def update(self):
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
-            
+
         if self.rect.right < 0:
             self.rect.left = WIDTH
         elif WIDTH < self.rect.left:
@@ -82,12 +82,12 @@ class Player(pg.sprite.Sprite):
             self.rect.top = HEIGHT
         elif HEIGHT < self.rect.top:
             self.rect.bottom = 0
-            
+
         self.rect.centerx += self.x_increase
         self.rect.centery += self.y_increase
         self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
-        self.rect = self.image.get_rect(center=self.rect.center) 
+        self.rect = self.image.get_rect(center=self.rect.center)
 
 
 class Laser(pg.sprite.Sprite):
@@ -101,19 +101,19 @@ class Laser(pg.sprite.Sprite):
         # move attr
         self.angle = angle
         self.speed = WIDTH//40
- 
+
     def update(self):
         if self.rect.y < 0 or self.rect.y > HEIGHT:
             self.kill()
         elif self.rect.x < 0 or self.rect.x > WIDTH:
             self.kill()
-            
+
         if self.angle < 0:
             self.angle += 360
-            
+
         self.rect.y -= int(self.speed*math.cos(math.radians(self.angle)))
-        self.rect.x -= int(self.speed*math.sin(math.radians(self.angle)))       
-            
+        self.rect.x -= int(self.speed*math.sin(math.radians(self.angle)))
+
 
 class Asteroid(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -153,14 +153,14 @@ class Asteroid(pg.sprite.Sprite):
             (self.rect.x < -self.rect.width) or
             (self.rect.x > WIDTH+self.rect.width)):
             self.kill()
-        
+
         if self.angle <= -360 or self.angle >= 360:
             self.angle = 0
-            
+
         self.angle += self.angle_speed
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
-        
+
         if self.r > 2:
             self.rect.y += self.speed
             self.rect.x += self.side_move
@@ -187,7 +187,7 @@ class Menu:
         style = pg.font.SysFont('Comic Sans MS', 100)
         center_text = lambda x: ((WIDTH - rects[x].width)//2,
                                  x*self.space + (HEIGHT - self.max_height)//2)
-    
+
         for i in range(len(self.texts)):
             text = style.render(self.texts[i], False, (0,0,255))
             rects.append(text.get_rect())
@@ -205,7 +205,7 @@ class Menu:
             if self.opacity >= 250:
                 self.alt = False
         else:
-            self.opacity -= blink_speed        
+            self.opacity -= blink_speed
             if self.opacity <= 100:
                 self.alt = True
 
@@ -239,14 +239,14 @@ class Menu:
             self.draw_menu()
             pg.display.flip()
             clock.tick(FPS)
-            
+
 
 class Bg_move:
     def __init__(self):
         self.bg_ctr = -HEIGHT
         img = pg.image.load("pixelart/space.png").convert_alpha()
         self.bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
-        
+
     def run(self):
         self.bg_ctr += 7
         disp.blit(self.bg, (0, self.bg_ctr-2*HEIGHT))
@@ -269,13 +269,13 @@ class Powerup(pg.sprite.Sprite):
     def update(self):
         self.rect.y += self.speed
         if self.rect.y < -self.rect.height or self.rect.y > HEIGHT:
-            self.kill()      
+            self.kill()
 
 
 
 class Shield(pg.sprite.Sprite):
     def __init__(self, player_obj):
-        super().__init__()       
+        super().__init__()
         self.player = player_obj
         circle_img = pg.Surface((WIDTH//5,WIDTH//5), pg.SRCALPHA)
         w = (circle_img.get_width() // 2)
@@ -299,7 +299,7 @@ class Game:
         self.t_asteroid_was_spawned = 0
         self.time_speed2_col = 0
         self.time_shield_col = 0
-       
+
         # some game objs
         self.player = Player(WIDTH//75, 5)
         self.bg = Bg_move()
@@ -312,7 +312,7 @@ class Game:
         self.lasers = pg.sprite.Group()
         self.health_pu = pg.sprite.Group()
         self.shield_pu = pg.sprite.Group()
-        self.speed2_pu = pg.sprite.Group()        
+        self.speed2_pu = pg.sprite.Group()
 
         self.shield = None
         self.score = 0
@@ -345,7 +345,7 @@ class Game:
 
             for hit in hits_meteor:
                 self.score += points
-            
+
         def hit_health_pu():
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.health_pu, True, pg.sprite.collide_mask)
@@ -355,11 +355,11 @@ class Game:
                     self.player.health = 100
                 else:
                     self.player.health += 10
- 
+
         def hit_shield_pu(rt = 10):
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.shield_pu, True, pg.sprite.collide_mask)
-        
+
             if hit_powerup and self.time_shield_col == 0:
                 self.shield = Shield(self.player)
                 self.sprites.add(self.shield)
@@ -373,7 +373,7 @@ class Game:
         def hit_speed2_pu(rt = 3):
             hit_powerup = pg.sprite.spritecollide(
                 self.player, self.speed2_pu, True, pg.sprite.collide_mask)
-        
+
             if hit_powerup and self.time_speed2_col == 0:
                 self.player.shoot_d = self.player.shoot_d/2
                 self.time_speed2_col = time()
@@ -403,11 +403,11 @@ class Game:
                 self.shield_pu.add(powerup)
             else:
                 self.speed2_pu.add(powerup)
- 
+
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
             'HEALTH', False, (255,255,255)),(30,30))
-        
+
         if 0 < self.player.health:
             pg.draw.rect(
                 disp, (255,255,255), [30,55,(WIDTH//300)*self.player.health,40])
@@ -439,7 +439,7 @@ class Game:
         self.speed2_pu.empty()
         self.sprites.empty()
         self.sprites.add(self.player)
-       
+
         for i in range(250,0,-5):
             text = pg.font.SysFont('Comic Sans MS', 200).render(
                 'GAME OVER', False, (255,255,255))
@@ -471,10 +471,10 @@ class Game:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         Menu(["resume", "quit"], self).run()
-              
+
             if self.player.health <= 0:
                 self.game_over()
-            
+
             if self.score > self.old_score + DIFFICULTY_SCORE_BARRIER:
                 self.old_score = self.score
                 fac = ASTEROID_SPAWN_FACTOR * ASTEROID_SPAWN_FACTOR
@@ -488,13 +488,13 @@ class Game:
             if laser != None:
                 self.lasers.add(laser)
 
-            self.player.control()    
+            self.player.control()
             self.spawn_powerups()
             disp.fill((0,0,0))
-            self.bg.run()     
-            self.collisions()        
+            self.bg.run()
+            self.collisions()
             self.lasers.update()
-            self.sprites.update()         
+            self.sprites.update()
             self.lasers.draw(disp)
             self.sprites.draw(disp)
             self.draw_hud()
@@ -512,4 +512,4 @@ clock = pg.time.Clock()
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
 Game().run()
-pg.quit() 
+pg.quit()
