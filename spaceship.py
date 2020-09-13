@@ -170,7 +170,7 @@ class Asteroid(pg.sprite.Sprite):
 
 
 class Menu:
-    def __init__(self, texts):
+    def __init__(self, texts, game_obj):
         self.texts = texts
         self.space = 100
         self.max_height = self.space*(len(texts))
@@ -178,8 +178,8 @@ class Menu:
         self.alt = True
         self.opacity = 100
         self.bg = Bg_move()
-        self.finished = False
-        self.close_game = False
+        self.close_menu = False
+        self.game_obj = game_obj
 
     def draw_menu(self):
         self.bg.run()
@@ -212,8 +212,8 @@ class Menu:
     def control(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                self.close_game = True
-                self.finished = True
+                self.game_obj.close_game = True
+                self.close_menu = True
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_w:
                     self.option -= 1
@@ -228,20 +228,18 @@ class Menu:
 
     def behaviour(self):
         if self.texts[self.option] == self.texts[0]:
-            self.finished = True
+            self.close_menu = True
         if self.texts[self.option] == self.texts[1]:
-            self.close_game = True
-            self.finished = True
+            self.game_obj.close_game = True
+            self.close_menu = True
 
     def run(self):
-        while not self.finished:
+        while not self.close_menu:
             self.control()
             self.draw_menu()
             pg.display.flip()
             clock.tick(FPS)
             
-        return self.close_game
-
 
 class Bg_move:
     def __init__(self):
@@ -465,14 +463,14 @@ class Game:
                 self.astroids_s.add(asteroid)
 
     def run(self):
-        self.close_game = Menu(["start", "quit"]).run()
+        Menu(["start", "quit"], self).run()
         while not self.close_game:
             for event in pg.event.get():
                 if event.type == pg.QUIT: 
                         self.close_game = True
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
-                        self.close_game = Menu(["resume", "quit"]).run()
+                        Menu(["resume", "quit"], self).run()
               
             if self.player.health <= 0:
                 self.game_over()
