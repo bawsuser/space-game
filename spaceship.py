@@ -3,6 +3,7 @@ from time import sleep, time
 import pygame as pg
 import math
 import pygame.gfxdraw
+import sqlite3
  
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
@@ -272,7 +273,6 @@ class Powerup(pg.sprite.Sprite):
             self.kill()
 
 
-
 class Shield(pg.sprite.Sprite):
     def __init__(self, player_obj):
         super().__init__()
@@ -291,6 +291,87 @@ class Shield(pg.sprite.Sprite):
 
     def kill_shield(self):
         self.kill()
+
+
+class Scoreboard:
+    def __init__(self, score):
+        self.name = ""
+        self.score = score
+        self.score_list = []
+        self.bg = Bg_move()
+        self.close_insert_name = False
+        self.close_scoreboard = False
+    
+    def control_name(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                done = True
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    print(self.name)
+                    self.name = ''
+                elif event.key == pg.K_BACKSPACE:
+                    self.name = self.name[:-1]
+                else:
+                    self.name += event.unicode
+
+    def draw_name(self):
+        font = pg.font.Font(None, 32)
+        input_box = pg.Rect(100, 100, 140, 32)
+        color = pg.Color('dodgerblue2')
+        self.bg.run()
+        disp.fill((30, 30, 30))
+        txt_surface = font.render(self.name, True, color)
+        width = max(200, txt_surface.get_width()+10)
+        input_box.w = width
+        disp.blit(txt_surface, (input_box.x+5, input_box.y+5))
+        pg.draw.rect(disp, color, input_box, 2)
+
+        pg.display.flip()
+        clock.tick(FPS)
+
+    def edit_db_scores(self):
+        db = sqlite3.connect("scores.db")
+        c = db.cursor()
+        try:
+            c.execute("""CREATE TABLE scores
+                     (name, score)""")
+        except:
+            pass
+
+        c.execute("""INSERT INTO scores (name, score)
+                  values('""" + self.name + """', """ + self.score + """)""")
+
+        db.commit()
+        rows = c.execute("SELECT * FROM scores")
+        for row in rows:
+            print(row)
+            
+        c.close()
+
+    def control_scoreboard(self):
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    self.close_scoreboard = True
+
+    def draw_board(self):
+        self.bg.run()
+
+    def run(self):
+        while not self.close_insert_name:
+            self.control_name()
+            self.draw_name()
+            pg.display.flip()
+            clock.tick(FPS)
+
+        self.edit_db_scores()
+
+        while not self.close_scoreboard:
+            self.control_scoreboard()
+            self.draw_board()
+            pg.display.flip()
+            clock.tick(FPS)
 
 
 class Game:
