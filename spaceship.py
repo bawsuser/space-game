@@ -304,31 +304,25 @@ class Scoreboard:
     
     def control_name(self):
         for event in pg.event.get():
-            if event.type == pg.QUIT:
-                done = True
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
                     print(self.name)
-                    self.name = ''
+                    self.close_scoreboard = True
                 elif event.key == pg.K_BACKSPACE:
                     self.name = self.name[:-1]
                 else:
                     self.name += event.unicode
 
     def draw_name(self):
-        font = pg.font.Font(None, 32)
-        input_box = pg.Rect(100, 100, 140, 32)
-        color = pg.Color('dodgerblue2')
         self.bg.run()
-        disp.fill((30, 30, 30))
+        font = pg.font.Font(None, 32)
+        color = pg.Color('dodgerblue2')
         txt_surface = font.render(self.name, True, color)
         width = max(200, txt_surface.get_width()+10)
+        input_box = pg.Rect(100, 100, 140, 32)
         input_box.w = width
         disp.blit(txt_surface, (input_box.x+5, input_box.y+5))
         pg.draw.rect(disp, color, input_box, 2)
-
-        pg.display.flip()
-        clock.tick(FPS)
 
     def edit_db_scores(self):
         db = sqlite3.connect("scores.db")
@@ -357,6 +351,15 @@ class Scoreboard:
 
     def draw_board(self):
         self.bg.run()
+        rects = []
+        style = pg.font.SysFont('Comic Sans MS', 100)
+        center_text = lambda x: ((WIDTH - rects[x].width)//2,
+                                 x*self.space + (HEIGHT - self.max_height)//2)
+
+        for i in range(len(self.score_list)):
+            text = style.render(self.score_list[i], False, (255,255,255))
+            rects.append(text.get_rect())
+            disp.blit(text, center_text(i))
 
     def run(self):
         while not self.close_insert_name:
@@ -365,7 +368,7 @@ class Scoreboard:
             pg.display.flip()
             clock.tick(FPS)
 
-        self.edit_db_scores()
+        #self.edit_db_scores()
 
         while not self.close_scoreboard:
             self.control_scoreboard()
