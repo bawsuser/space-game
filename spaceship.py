@@ -295,7 +295,7 @@ class Shield(pg.sprite.Sprite):
 
 class Scoreboard:
     def __init__(self, score):
-        self.name = ""
+        self.name = '' 
         self.score = score
         self.score_list = []
         self.bg = Bg_move()
@@ -307,40 +307,74 @@ class Scoreboard:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
                     print(self.name)
-                    self.close_scoreboard = True
+                    self.close_insert_name = True
                 elif event.key == pg.K_BACKSPACE:
                     self.name = self.name[:-1]
+                elif 20 < len(self.name):
+                    pass
                 else:
                     self.name += event.unicode
 
     def draw_name(self):
         self.bg.run()
-        font = pg.font.Font(None, 32)
-        color = pg.Color('dodgerblue2')
-        txt_surface = font.render(self.name, True, color)
-        width = max(200, txt_surface.get_width()+10)
-        input_box = pg.Rect(100, 100, 140, 32)
-        input_box.w = width
-        disp.blit(txt_surface, (input_box.x+5, input_box.y+5))
-        pg.draw.rect(disp, color, input_box, 2)
+        color = (255, 255, 255)
+
+        # input request
+        font = pg.font.Font(None, 100*HEIGHT//720)
+        req_surface = font.render("YOUR NAME", True, color)
+        w = req_surface.get_width()
+        h = req_surface.get_height()
+        disp.blit(req_surface, ((WIDTH - w)//2, (HEIGHT - h)//2 - int(h*0.8)))
+        
+        # input field
+        font = pg.font.Font(None, 64*HEIGHT//720)
+        name_surface = font.render(self.name, True, color)
+        w = max(300, name_surface.get_width()+10)
+        h = max(64, name_surface.get_height()+10)
+        name_box = pg.Rect((WIDTH - w)//2, (HEIGHT - h)//2 + int(h*0.8), 10, 10)
+        name_box.w = w
+        name_box.h = h
+        disp.blit(name_surface, (name_box.x + 5*WIDTH//1280, name_box.y + 5*HEIGHT//720))
+        pg.draw.rect(disp, color, name_box, 1)
 
     def edit_db_scores(self):
+        def create_table():
+             # create table
+            try:
+                c.execute("""CREATE TABLE scores
+                         (id INTEGER PRIMARY KEY, name, score)""")
+            except:
+                pass
+
+        def insert_name():
+            # insert name 
+            c.execute("""INSERT INTO scores (name, score)
+                      values('""" + self.name + """', """ + str(self.score) + """)""")
+
+
+        def read_in_db():
+            # read in scorelist from table
+            rows = c.execute("SELECT * FROM scores")
+            self.score_list = []
+            for row in enumerate(rows):
+                print(row[0])
+                if 4  < row[0]:
+                    c.execute("DELETE FROM scores WHERE id = (SELECT MIN(id) FROM scores WHERE score = (SELECT MIN(score) FROM scores))")
+            
+            rows = c.execute("SELECT * FROM scores ORDER BY score")
+            for row in rows:
+                name = row[1]
+                score = row[2]
+                self.score_list.append((name, score))
+
+        
+
         db = sqlite3.connect("scores.db")
         c = db.cursor()
-        try:
-            c.execute("""CREATE TABLE scores
-                     (name, score)""")
-        except:
-            pass
-
-        c.execute("""INSERT INTO scores (name, score)
-                  values('""" + self.name + """', """ + self.score + """)""")
-
+        create_table()
+        insert_name()
+        read_in_db()
         db.commit()
-        rows = c.execute("SELECT * FROM scores")
-        for row in rows:
-            print(row)
-            
         c.close()
 
     def control_scoreboard(self):
@@ -351,14 +385,28 @@ class Scoreboard:
 
     def draw_board(self):
         self.bg.run()
+
+        # headline
+        head_style = pg.font.SysFont('Comic Sans MS', 120*HEIGHT//720)
+        text = head_style.render("HIGHSCORES", False, (255, 255, 0))
+        rect_h = text.get_rect()
+        head_height = rect_h.height
+        disp.blit(text, ((WIDTH - rect_h.width)//2, 50))
+
+        # list
+        space = 100*HEIGHT//720
+        max_height = space*(len(self.score_list))
         rects = []
-        style = pg.font.SysFont('Comic Sans MS', 100)
-        center_text = lambda x: ((WIDTH - rects[x].width)//2,
-                                 x*self.space + (HEIGHT - self.max_height)//2)
+        style = pg.font.SysFont('Comic Sans MS', 100*HEIGHT//720)
+        center_text = lambda x: ((WIDTH - rect_h.width)//2,
+                                 x*space + head_height + (HEIGHT - max_height)//2)
 
         for i in range(len(self.score_list)):
-            text = style.render(self.score_list[i], False, (255,255,255))
-            rects.append(text.get_rect())
+            name = self.score_list[i][0]
+            score = self.score_list[i][1]
+            text = style.render(str(i+1) + ". " + name + " " + str(score) , False, (255,255,255))
+            rect = text.get_rect()
+            rects.append(rect)
             disp.blit(text, center_text(i))
 
     def run(self):
@@ -368,7 +416,7 @@ class Scoreboard:
             pg.display.flip()
             clock.tick(FPS)
 
-        #self.edit_db_scores()
+        self.edit_db_scores()
 
         while not self.close_scoreboard:
             self.control_scoreboard()
@@ -510,10 +558,9 @@ class Game:
         bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
         self.asteroid_spawn_delay = 1
         self.player.health = 100
-        self.score = 0
         self.player.angle = 0
         self.player.rect = self.player.orig.get_rect(
-            center=self.player.disp_rect.center)
+        center=self.player.disp_rect.center)
         self.astroids_s.empty() 
         self.astroids_m.empty()
         self.astroids_l.empty()
@@ -534,6 +581,9 @@ class Game:
             pg.display.flip()
             sleep(0.03)
 
+        Scoreboard(self.score).run()
+        self.score = 0
+ 
     def spawn_astroids(self, blob_size):
         li = list(range(-5,0)) + list(range(1,6))
         for i in range(blob_size):
