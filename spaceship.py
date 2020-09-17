@@ -1,14 +1,17 @@
-from random import randint, choice
-from time import sleep, time
 import pygame as pg
 import math
 import pygame.gfxdraw
 import sqlite3
- 
+from random import randint, choice
+from time import sleep, time
+
+
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed):
         super().__init__()
-        ship_img = pg.transform.scale(pg.image.load("pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
+        ship_img = pg.transform.scale(
+                pg.image.load(
+                    "pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
         self.orig = ship_img
         self.image = self.orig
         self.disp_rect = disp.get_rect()
@@ -186,8 +189,9 @@ class Menu:
         self.bg.run()
         rects = []
         style = pg.font.SysFont('Comic Sans MS', 100)
-        center_text = lambda x: ((WIDTH - rects[x].width)//2,
-                                 x*self.space + (HEIGHT - self.max_height)//2)
+        center_text = lambda x: (
+                (WIDTH - rects[x].width)//2,
+                x*self.space + (HEIGHT - self.max_height)//2)
 
         for i in range(len(self.texts)):
             text = style.render(self.texts[i], False, (0,0,255))
@@ -279,7 +283,8 @@ class Shield(pg.sprite.Sprite):
         self.player = player_obj
         circle_img = pg.Surface((WIDTH//5,WIDTH//5), pg.SRCALPHA)
         w = (circle_img.get_width() // 2)
-        pg.gfxdraw.filled_circle(circle_img, w, w, WIDTH//10, (255,255,255,150))
+        pg.gfxdraw.filled_circle(
+                circle_img, w, w, WIDTH//10, (255,255,255,150))
         # aacircle fixes collision bug
         pg.gfxdraw.aacircle(circle_img, w, w, WIDTH//10, (0,0,0))
         self.image = circle_img 
@@ -295,7 +300,7 @@ class Shield(pg.sprite.Sprite):
 
 class Scoreboard:
     def __init__(self, score):
-        self.name = '' 
+        self.name = "" 
         self.score = score
         self.score_list = []
         self.bg = Bg_move()
@@ -328,25 +333,29 @@ class Scoreboard:
         # input field
         font = pg.font.Font(None, 64*HEIGHT//720)
         name_surface = font.render(self.name, True, color)
-        w = max(300, name_surface.get_width()+10)
-        h = max(64, name_surface.get_height()+10)
-        name_box = pg.Rect((WIDTH - w)//2, (HEIGHT - h)//2 + int(h*0.8), 10, 10)
+        w = max(300, name_surface.get_width() + 10)
+        h = max(64, name_surface.get_height() + 10)
+        name_box = pg.Rect(
+                (WIDTH - w)//2, (HEIGHT - h)//2 + int(h*0.8), 10, 10)
         name_box.w = w
         name_box.h = h
-        disp.blit(name_surface, (name_box.x + 5*WIDTH//1280, name_box.y + 5*HEIGHT//720))
+        disp.blit(
+                name_surface, 
+                (name_box.x + 5*WIDTH//1280, name_box.y + 5*HEIGHT//720))
         pg.draw.rect(disp, color, name_box, 1)
 
     def edit_db_scores(self):
         def create_table():
             try:
-                c.execute("""CREATE TABLE scores
-                         (id INTEGER PRIMARY KEY, name, score)""")
+                c.execute("""CREATE TABLE scores 
+                        (id INTEGER PRIMARY KEY, name, score)""")
             except:
                 pass
 
         def insert_name():
-            c.execute("""INSERT INTO scores (name, score)
-                      values('""" + self.name + """', """ + str(self.score) + """)""")
+            c.execute("""INSERT INTO scores (name, score) 
+                      values('""" + self.name + """', """ 
+                      + str(self.score) + """)""")
 
 
         def read_in_db():
@@ -354,7 +363,10 @@ class Scoreboard:
             self.score_list = []
             for row in enumerate(rows):
                 if 4  < row[0]:
-                    c.execute("DELETE FROM scores WHERE id = (SELECT MIN(id) FROM scores WHERE score = (SELECT MIN(score) FROM scores))")
+                    c.execute("""DELETE FROM scores 
+                              WHERE id = (SELECT MIN(id) FROM scores 
+                              WHERE score = (SELECT MIN(score) 
+                              FROM scores))""")
             
             rows = c.execute("SELECT * FROM scores ORDER BY score DESC")
             for row in rows:
@@ -393,13 +405,16 @@ class Scoreboard:
         max_height = space*(len(self.score_list))
         rects = []
         style = pg.font.SysFont('Comic Sans MS', 100*HEIGHT//720)
-        center_text = lambda x: ((WIDTH - rect_h.width)//2,
-                                 x*space + head_height + (HEIGHT - max_height)//2)
+        center_text = lambda x: (
+                (WIDTH - rect_h.width)//2,
+                x*space + head_height + (HEIGHT - max_height)//2)
 
         for i in range(len(self.score_list)):
             name = self.score_list[i][0]
             score = self.score_list[i][1]
-            text = style.render(str(i+1) + ". " + name + " " + str(score) , False, (255,255,255))
+            text = style.render(
+                    str(i+1) + ". " + name + " " 
+                    + str(score) , False, (255,255,255))
             rect = text.get_rect()
             rects.append(rect)
             disp.blit(text, center_text(i))
@@ -448,10 +463,10 @@ class Game:
         self.sprites.add(self.player)
         self.close_game = False
         self.pu_list= [
-            "pixelart/shield.png",
-            "pixelart/health.png",
-            "pixelart/speed2.png"
-            ]
+                "pixelart/shield.png",
+                "pixelart/health.png",
+                "pixelart/speed2.png"
+                ]
 
     def collisions(self):
         def hits_ship(group, damage):
@@ -537,7 +552,9 @@ class Game:
 
         if 0 < self.player.health:
             pg.draw.rect(
-                disp, (255,255,255), [30,55,(WIDTH//300)*self.player.health,40])
+                disp,
+                (255,255,255),
+                [30,55,(WIDTH//300)*self.player.health,40])
 
         score = pg.font.SysFont(
             'Comic Sans MS', 114).render(
@@ -568,11 +585,14 @@ class Game:
 
         for i in range(250,0,-5):
             text = pg.font.SysFont('Comic Sans MS', 200).render(
-                'GAME OVER', False, (255,255,255))
+                    'GAME OVER', False, (255,255,255))
             text.set_alpha(i) 
             rect = text.get_rect()
             disp.blit(bg, (0, 0))
-            disp.blit(text, ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
+            disp.blit(
+                    text,
+                    ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
+
             pg.display.flip()
             sleep(0.03)
 
@@ -606,10 +626,11 @@ class Game:
 
             if self.score > self.old_score + DIFFICULTY_SCORE_BARRIER:
                 self.old_score = self.score
-                fac = ASTEROID_SPAWN_FACTOR * ASTEROID_SPAWN_FACTOR
-                self.asteroid_spawn_delay = self.asteroid_spawn_delay * fac 
+                fac = ASTEROID_SPAWN_FACTOR*ASTEROID_SPAWN_FACTOR
+                self.asteroid_spawn_delay = self.asteroid_spawn_delay*fac 
 
-            if time() - self.t_asteroid_was_spawned >= self.asteroid_spawn_delay:
+            past_time = time() - self.t_asteroid_was_spawned
+            if (past_time >= self.asteroid_spawn_delay):
                 self.spawn_astroids(1)
                 self.t_asteroid_was_spawned = time()
 
