@@ -306,7 +306,6 @@ class Scoreboard:
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
-                    print(self.name)
                     self.close_insert_name = True
                 elif event.key == pg.K_BACKSPACE:
                     self.name = self.name[:-1]
@@ -339,7 +338,6 @@ class Scoreboard:
 
     def edit_db_scores(self):
         def create_table():
-             # create table
             try:
                 c.execute("""CREATE TABLE scores
                          (id INTEGER PRIMARY KEY, name, score)""")
@@ -347,21 +345,18 @@ class Scoreboard:
                 pass
 
         def insert_name():
-            # insert name 
             c.execute("""INSERT INTO scores (name, score)
                       values('""" + self.name + """', """ + str(self.score) + """)""")
 
 
         def read_in_db():
-            # read in scorelist from table
             rows = c.execute("SELECT * FROM scores")
             self.score_list = []
             for row in enumerate(rows):
-                print(row[0])
                 if 4  < row[0]:
                     c.execute("DELETE FROM scores WHERE id = (SELECT MIN(id) FROM scores WHERE score = (SELECT MIN(score) FROM scores))")
             
-            rows = c.execute("SELECT * FROM scores ORDER BY score")
+            rows = c.execute("SELECT * FROM scores ORDER BY score DESC")
             for row in rows:
                 name = row[1]
                 score = row[2]
