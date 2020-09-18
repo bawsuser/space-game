@@ -612,7 +612,8 @@ class Game:
                 self.astroids_s.add(asteroid)
 
     def run(self):
-        Menu(["start", "quit"], self).run()
+        start_menu = Menu(["start", "quit"], self)
+        start_menu.run()
         while not self.close_game:
             for event in pg.event.get():
                 if event.type == pg.QUIT: 
@@ -623,6 +624,8 @@ class Game:
 
             if self.player.health <= 0:
                 self.game_over()
+                start_menu.close_menu = False
+                start_menu.run()
 
             if self.score > self.old_score + DIFFICULTY_SCORE_BARRIER:
                 self.old_score = self.score
