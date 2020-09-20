@@ -447,9 +447,7 @@ class Game:
         self.bg = Bg_move()
 
         # sprite groups
-        self.astroids_s = pg.sprite.Group()
-        self.astroids_m = pg.sprite.Group()
-        self.astroids_l = pg.sprite.Group()
+        self.astroids = pg.sprite.Group()
         self.sprites = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
         self.health_pu = pg.sprite.Group()
@@ -469,24 +467,42 @@ class Game:
                 ]
 
     def collisions(self):
-        def hits_ship(group, damage):
-            hits_ship = pg.sprite.spritecollide(
-                self.player, group, True, pg.sprite.collide_mask)
-            for hit in hits_ship:
-                self.player.health -= damage
+        def damage_points(size):
+            if size == 7:
+                return 15
+            elif size == 8:
+                return 10
+            else:
+                return 5
 
-        def hits_meteor(group, points):
-            hits_meteor = pg.sprite.groupcollide(
-                self.lasers, group, True, pg.sprite.collide_mask)
+        def hits_ship():
+            for elem in self.astroids:
+                hits_ship = pg.sprite.collide_mask(
+                        self.player, elem)
+
+                if hits_ship != None:
+                    self.player.health -= damage_points(elem.size) 
+                    elem.kill()
+
+        def hits_meteor():
+            for elem in self.astroids:
+                group = pg.sprite.Group()
+                group.add(elem)
+                hits_meteor = pg.sprite.groupcollide(
+                        self.lasers, group, True, pg.sprite.collide_mask)
+                
+                print (hits_meteor)
+                if hits_meteor != {}:
+                    self.score += damage_points(elem.size)
+                    elem.kill()
 
             if self.shield != None:
-                hits_shield = pg.sprite.spritecollide(
-                    self.shield, group, True, pg.sprite.collide_mask)
-                for hit in hits_shield:
-                    self.score += points
-
-            for hit in hits_meteor:
-                self.score += points
+                for elem in self.astroids:
+                    hits_shield = pg.sprite.collide_mask(
+                        self.shield, elem)
+                    if hits_shield != None:
+                        self.score += damage_points(elem.size)
+                        elem.kill()
 
         def hit_health_pu():
             hit_powerup = pg.sprite.spritecollide(
@@ -525,12 +541,8 @@ class Game:
                 self.player.shoot_d = self.player.shoot_d*2 
 
 
-        hits_ship(self.astroids_s,5)
-        hits_ship(self.astroids_m,10)
-        hits_ship(self.astroids_l,15)
-        hits_meteor(self.astroids_s,5)
-        hits_meteor(self.astroids_m,10)
-        hits_meteor(self.astroids_l,15)
+        hits_ship()
+        hits_meteor()
         hit_health_pu()
         hit_shield_pu()
         hit_speed2_pu()
@@ -573,9 +585,7 @@ class Game:
         self.player.angle = 0
         self.player.rect = self.player.orig.get_rect(
         center=self.player.disp_rect.center)
-        self.astroids_s.empty() 
-        self.astroids_m.empty()
-        self.astroids_l.empty()
+        self.astroids.empty() 
         self.lasers.empty()
         self.health_pu.empty()
         self.shield_pu.empty()
@@ -604,12 +614,7 @@ class Game:
         for i in range(blob_size):
             asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
             self.sprites.add(asteroid)
-            if asteroid.size == 7:
-                self.astroids_l.add(asteroid)
-            elif asteroid.size == 8:
-                self.astroids_m.add(asteroid)
-            else:
-                self.astroids_s.add(asteroid)
+            self.astroids.add(asteroid)
 
     def run(self):
         start_menu = Menu(["start", "quit"], self)
