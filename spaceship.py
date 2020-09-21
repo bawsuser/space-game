@@ -548,6 +548,13 @@ class Game:
             self.sprites.add(powerup)
             self.powerups.add(powerup)
 
+    def spawn_astroids(self, blob_size):
+        li = list(range(-5,0)) + list(range(1,6))
+        for i in range(blob_size):
+            asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
+            self.sprites.add(asteroid)
+            self.astroids.add(asteroid)
+
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
             'HEALTH', False, (255,255,255)),(30,30))
@@ -597,13 +604,6 @@ class Game:
         Scoreboard(self.score).run()
         self.score = 0
  
-    def spawn_astroids(self, blob_size):
-        li = list(range(-5,0)) + list(range(1,6))
-        for i in range(blob_size):
-            asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
-            self.sprites.add(asteroid)
-            self.astroids.add(asteroid)
-
     def run(self):
         start_menu = Menu(["start", "quit"], self)
         start_menu.run()
