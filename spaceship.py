@@ -450,9 +450,7 @@ class Game:
         self.astroids = pg.sprite.Group()
         self.sprites = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
-        self.health_pu = pg.sprite.Group()
-        self.shield_pu = pg.sprite.Group()
-        self.speed2_pu = pg.sprite.Group()
+        self.powerups = pg.sprite.Group()
 
         self.shield = None
         self.score = 0
@@ -491,7 +489,6 @@ class Game:
                 hits_meteor = pg.sprite.groupcollide(
                         self.lasers, group, True, pg.sprite.collide_mask)
                 
-                print (hits_meteor)
                 if hits_meteor != {}:
                     self.score += damage_points(elem.size)
                     elem.kill()
@@ -503,60 +500,53 @@ class Game:
                     if hits_shield != None:
                         self.score += damage_points(elem.size)
                         elem.kill()
+        
+        def hits_powerup():
+            for elem in self.powerups:
+                group = pg.sprite.Group()
+                group.add(elem)
+                hit_powerup = pg.sprite.spritecollide(
+                    self.player, group, False, pg.sprite.collide_mask)
+                
+                if hit_powerup != []: 
+                    string = elem.img
+                    elem.kill()
+                    if "shield" in string:
+                        if self.time_shield_col == 0:
+                            self.shield = Shield(self.player)
+                            self.sprites.add(self.shield)
+                            self.time_shield_col = time()
 
-        def hit_health_pu():
-            hit_powerup = pg.sprite.spritecollide(
-                self.player, self.health_pu, True, pg.sprite.collide_mask)
+                    if "health" in string:
+                        if self.player.health + 10 > 100:
+                            self.player.health = 100
+                        else:
+                            self.player.health += 10
 
-            if hit_powerup:
-                if self.player.health + 10 > 100:
-                    self.player.health = 100
-                else:
-                    self.player.health += 10
+                    if "speed2" in string:
+                        if self.time_speed2_col == 0:
+                            self.player.shoot_d = self.player.shoot_d/2
+                            self.time_speed2_col = time()
 
-        def hit_shield_pu(rt = 10):
-            hit_powerup = pg.sprite.spritecollide(
-                self.player, self.shield_pu, True, pg.sprite.collide_mask)
+                            
+                if time() > time() - self.time_shield_col >= 10:
+                    self.shield.kill_shield()
+                    self.shield = None
+                    self.time_shield_col = 0
 
-            if hit_powerup and self.time_shield_col == 0:
-                self.shield = Shield(self.player)
-                self.sprites.add(self.shield)
-                self.time_shield_col = time()
-
-            if time() > time() - self.time_shield_col >= rt:
-                self.shield.kill_shield()
-                self.shield = None
-                self.time_shield_col = 0
-
-        def hit_speed2_pu(rt = 3):
-            hit_powerup = pg.sprite.spritecollide(
-                self.player, self.speed2_pu, True, pg.sprite.collide_mask)
-
-            if hit_powerup and self.time_speed2_col == 0:
-                self.player.shoot_d = self.player.shoot_d/2
-                self.time_speed2_col = time()
-
-            if time() > time() - self.time_speed2_col >= rt:
-                self.time_speed2_col = 0
-                self.player.shoot_d = self.player.shoot_d*2 
-
+                if time() > time() - self.time_speed2_col >= 3:
+                    self.time_speed2_col = 0
+                    self.player.shoot_d = self.player.shoot_d*2 
 
         hits_ship()
         hits_meteor()
-        hit_health_pu()
-        hit_shield_pu()
-        hit_speed2_pu()
+        hits_powerup()
 
     def spawn_powerups(self):
         if randint(0, PU_CHANCE) == 1:
             powerup = Powerup(choice(self.pu_list))
             self.sprites.add(powerup)
-            if("health" in powerup.img):
-                self.health_pu.add(powerup)
-            elif("shield" in powerup.img):
-                self.shield_pu.add(powerup)
-            else:
-                self.speed2_pu.add(powerup)
+            self.powerups.add(powerup)
 
     def draw_hud(self):
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
@@ -587,9 +577,7 @@ class Game:
         center=self.player.disp_rect.center)
         self.astroids.empty() 
         self.lasers.empty()
-        self.health_pu.empty()
-        self.shield_pu.empty()
-        self.speed2_pu.empty()
+        self.powerups.empty()
         self.sprites.empty()
         self.sprites.add(self.player)
 
@@ -645,15 +633,14 @@ class Game:
             laser = self.player.shoot_laser()
             if laser != None:
                 self.lasers.add(laser)
+                self.sprites.add(laser)
 
             self.player.control()
             self.spawn_powerups()
             disp.fill((0,0,0))
             self.bg.run()
             self.collisions()
-            self.lasers.update()
             self.sprites.update()
-            self.lasers.draw(disp)
             self.sprites.draw(disp)
             self.draw_hud()
             pg.display.flip()
