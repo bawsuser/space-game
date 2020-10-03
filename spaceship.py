@@ -1,9 +1,9 @@
-import pygame as pg
-import math
-import pygame.gfxdraw
-import sqlite3
 from random import randint, choice
 from time import sleep, time
+import sqlite3
+import math
+from pygame import gfxdraw
+import pygame as pg
 
 
 class Player(pg.sprite.Sprite):
@@ -23,7 +23,7 @@ class Player(pg.sprite.Sprite):
         self.x_increase = 0
         self.y_increase = 0
 
-        #angle move attr
+        # angle move attr
         self.angle_speed = angle_speed
         self.angle_increase = 0
         self.angle = 0
@@ -32,7 +32,7 @@ class Player(pg.sprite.Sprite):
         self.shoot = False
         self.shoot_d = 0.2
         self.shoot_t_old = 0
-        self.shoot_t_now = self.shoot_d 
+        self.shoot_t_now = self.shoot_d
 
     def control(self):
         pressed = pg.key.get_pressed()
@@ -64,15 +64,15 @@ class Player(pg.sprite.Sprite):
 
     def shoot_laser(self):
         self.shoot_t_now = time()
-        if ((self.shoot == True) and
-            (self.shoot_t_now - self.shoot_t_old >= self.shoot_d)):
+        time_past = self.shoot_t_now - self.shoot_t_old
+        laser = None
+        if self.shoot and time_past >= self.shoot_d:
             laser = Laser(self.angle)
             laser.rect.centerx = self.rect.centerx
             laser.rect.bottom = self.rect.centery
             self.shoot_t_old = time()
-            return laser
-        else:
-            return None
+
+        return laser
 
     def update(self):
         if self.angle <= -360 or self.angle >= 360:
@@ -81,7 +81,7 @@ class Player(pg.sprite.Sprite):
         if self.rect.right < 0:
             self.rect.left = WIDTH
         elif WIDTH < self.rect.left:
-            self.rect.right = 0 
+            self.rect.right = 0
         elif self.rect.bottom < 0:
             self.rect.top = HEIGHT
         elif HEIGHT < self.rect.top:
@@ -98,7 +98,7 @@ class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
         super().__init__()
         self.image = pg.transform.scale(
-            pg.Surface([20, 20]), (WIDTH//100, WIDTH//100))
+            pg.Surface((20, 20)), (WIDTH//100, WIDTH//100))
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect()
 
@@ -136,14 +136,14 @@ class Asteroid(pg.sprite.Sprite):
         self.r = randint(1,4)
         self.side_move = randint(-5,5)
 
-        if 1 == self.r:
+        if self.r == 1:
             self.rect.x = -self.rect.width
             self.rect.y = randint(0,HEIGHT-self.rect.height)
-        elif 2 == self.r:
+        elif self.r == 2:
             self.speed = -self.speed
             self.rect.x = WIDTH
             self.rect.y = randint(0,HEIGHT-self.rect.height)
-        elif 3 == self.r:
+        elif self.r == 3:
             self.speed = -self.speed
             self.rect.y = HEIGHT
             self.rect.x = randint(0,WIDTH-self.rect.width)
@@ -181,7 +181,7 @@ class Menu:
         self.option = 0
         self.alt = True
         self.opacity = 100
-        self.bg = Bg_move()
+        self.bg = BgMove()
         self.close_menu = False
         self.game_obj = game_obj
 
@@ -201,11 +201,11 @@ class Menu:
 
         text_bg = style.render(self.texts[self.option], False, (255,255,0))
         text = style.render(self.texts[self.option], False, (255,255,255))
-        text.set_alpha(self.opacity)       
+        text.set_alpha(self.opacity)
         disp.blit(text_bg, center_text(self.option))
         disp.blit(text, center_text(self.option))
         blink_speed = 4
-        if self.alt == True:
+        if self.alt:
             self.opacity += blink_speed
             if self.opacity >= 250:
                 self.alt = False
@@ -246,7 +246,7 @@ class Menu:
             clock.tick(FPS)
 
 
-class Bg_move:
+class BgMove:
     def __init__(self):
         self.bg_ctr = -HEIGHT
         img = pg.image.load("pixelart/space.png").convert_alpha()
@@ -283,11 +283,11 @@ class Shield(pg.sprite.Sprite):
         self.player = player_obj
         circle_img = pg.Surface((WIDTH//5,WIDTH//5), pg.SRCALPHA)
         w = (circle_img.get_width() // 2)
-        pg.gfxdraw.filled_circle(
+        gfxdraw.filled_circle(
                 circle_img, w, w, WIDTH//10, (255,255,255,150))
         # aacircle fixes collision bug
-        pg.gfxdraw.aacircle(circle_img, w, w, WIDTH//10, (0,0,0))
-        self.image = circle_img 
+        gfxdraw.aacircle(circle_img, w, w, WIDTH//10, (0,0,0))
+        self.image = circle_img
         self.rect = self.image.get_rect()
 
     def update(self):
@@ -300,13 +300,13 @@ class Shield(pg.sprite.Sprite):
 
 class Scoreboard:
     def __init__(self, score):
-        self.name = "" 
+        self.name = ""
         self.score = score
         self.score_list = []
-        self.bg = Bg_move()
+        self.bg = BgMove()
         self.close_insert_name = False
         self.close_scoreboard = False
-    
+
     def control_name(self):
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
@@ -314,7 +314,7 @@ class Scoreboard:
                     self.close_insert_name = True
                 elif event.key == pg.K_BACKSPACE:
                     self.name = self.name[:-1]
-                elif 20 < len(self.name):
+                elif len(self.name) > 20:
                     pass
                 else:
                     self.name += event.unicode
@@ -329,7 +329,7 @@ class Scoreboard:
         w = req_surface.get_width()
         h = req_surface.get_height()
         disp.blit(req_surface, ((WIDTH - w)//2, (HEIGHT - h)//2 - int(h*0.8)))
-        
+
         # input field
         font = pg.font.Font(None, 64*HEIGHT//720)
         name_surface = font.render(self.name, True, color)
@@ -340,21 +340,21 @@ class Scoreboard:
         name_box.w = w
         name_box.h = h
         disp.blit(
-                name_surface, 
+                name_surface,
                 (name_box.x + 5*WIDTH//1280, name_box.y + 5*HEIGHT//720))
         pg.draw.rect(disp, color, name_box, 1)
 
     def edit_db_scores(self):
         def create_table():
             try:
-                c.execute("""CREATE TABLE scores 
+                c.execute("""CREATE TABLE scores
                         (id INTEGER PRIMARY KEY, name, score)""")
-            except:
+            except sqlite3.OperationalError:
                 pass
 
         def insert_name():
-            c.execute("""INSERT INTO scores (name, score) 
-                      values('""" + self.name + """', """ 
+            c.execute("""INSERT INTO scores (name, score)
+                      values('""" + self.name + """', """
                       + str(self.score) + """)""")
 
 
@@ -362,19 +362,19 @@ class Scoreboard:
             rows = c.execute("SELECT * FROM scores")
             self.score_list = []
             for row in enumerate(rows):
-                if 4  < row[0]:
-                    c.execute("""DELETE FROM scores 
-                              WHERE id = (SELECT MIN(id) FROM scores 
-                              WHERE score = (SELECT MIN(score) 
+                if row[0] > 4:
+                    c.execute("""DELETE FROM scores
+                              WHERE id = (SELECT MIN(id) FROM scores
+                              WHERE score = (SELECT MIN(score)
                               FROM scores))""")
-            
+
             rows = c.execute("SELECT * FROM scores ORDER BY score DESC")
             for row in rows:
                 name = row[1]
                 score = row[2]
                 self.score_list.append((name, score))
 
-        
+
 
         db = sqlite3.connect("scores.db")
         c = db.cursor()
@@ -413,7 +413,7 @@ class Scoreboard:
             name = self.score_list[i][0]
             score = self.score_list[i][1]
             text = style.render(
-                    str(i+1) + ". " + name + " " 
+                    str(i+1) + ". " + name + " "
                     + str(score) , False, (255,255,255))
             rect = text.get_rect()
             rects.append(rect)
@@ -444,7 +444,7 @@ class Game:
 
         # some game objs
         self.player = Player(WIDTH//75, 5)
-        self.bg = Bg_move()
+        self.bg = BgMove()
 
         # sprite groups
         self.astroids = pg.sprite.Group()
@@ -466,20 +466,21 @@ class Game:
 
     def collisions(self):
         def damage_points(size):
-            if size == 7:
-                return 15
-            elif size == 8:
-                return 10
-            else:
-                return 5
+            damage_dict = {
+                7: 15,
+                8: 10,
+                9: 5
+                }
+
+            return damage_dict[size]
 
         def hits_ship():
             for elem in self.astroids:
                 hits_ship = pg.sprite.collide_mask(
                         self.player, elem)
 
-                if hits_ship != None:
-                    self.player.health -= damage_points(elem.size) 
+                if hits_ship is not None:
+                    self.player.health -= damage_points(elem.size)
                     elem.kill()
 
         def hits_meteor():
@@ -488,27 +489,27 @@ class Game:
                 group.add(elem)
                 hits_meteor = pg.sprite.groupcollide(
                         self.lasers, group, True, pg.sprite.collide_mask)
-                
+
                 if hits_meteor != {}:
                     self.score += damage_points(elem.size)
                     elem.kill()
 
-            if self.shield != None:
+            if self.shield is not None:
                 for elem in self.astroids:
                     hits_shield = pg.sprite.collide_mask(
                         self.shield, elem)
-                    if hits_shield != None:
+                    if hits_shield is not None:
                         self.score += damage_points(elem.size)
                         elem.kill()
-        
+
         def hits_powerup():
             for elem in self.powerups:
                 group = pg.sprite.Group()
                 group.add(elem)
                 hit_powerup = pg.sprite.spritecollide(
                     self.player, group, False, pg.sprite.collide_mask)
-                
-                if hit_powerup != []: 
+
+                if hit_powerup != []:
                     string = elem.img
                     elem.kill()
                     if "shield" in string:
@@ -528,7 +529,7 @@ class Game:
                             self.player.shoot_d = self.player.shoot_d/2
                             self.time_speed2_col = time()
 
-                            
+
                 if time() > time() - self.time_shield_col >= 10:
                     self.shield.kill_shield()
                     self.shield = None
@@ -536,7 +537,7 @@ class Game:
 
                 if time() > time() - self.time_speed2_col >= 3:
                     self.time_speed2_col = 0
-                    self.player.shoot_d = self.player.shoot_d*2 
+                    self.player.shoot_d = self.player.shoot_d*2
 
         hits_ship()
         hits_meteor()
@@ -549,9 +550,9 @@ class Game:
             self.powerups.add(powerup)
 
     def spawn_astroids(self, blob_size):
-        li = list(range(-5,0)) + list(range(1,6))
-        for i in range(blob_size):
-            asteroid = Asteroid(WIDTH//randint(100,150), choice(li))
+        angle_speed = list(range(-5,0)) + list(range(1,6))
+        for _ in range(blob_size):
+            asteroid = Asteroid(WIDTH//randint(100,150), choice(angle_speed))
             self.sprites.add(asteroid)
             self.astroids.add(asteroid)
 
@@ -559,7 +560,7 @@ class Game:
         disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
             'HEALTH', False, (255,255,255)),(30,30))
 
-        if 0 < self.player.health:
+        if self.player.health > 0:
             pg.draw.rect(
                 disp,
                 (255,255,255),
@@ -582,16 +583,14 @@ class Game:
         self.player.angle = 0
         self.player.rect = self.player.orig.get_rect(
         center=self.player.disp_rect.center)
-        self.astroids.empty() 
-        self.lasers.empty()
-        self.powerups.empty()
-        self.sprites.empty()
+        for attr in ('astroids', 'lasers', 'powerups', 'sprites'):
+            getattr(self, attr).empty()
         self.sprites.add(self.player)
 
         for i in range(250,0,-5):
             text = pg.font.SysFont('Comic Sans MS', 200).render(
                     'GAME OVER', False, (255,255,255))
-            text.set_alpha(i) 
+            text.set_alpha(i)
             rect = text.get_rect()
             disp.blit(bg, (0, 0))
             disp.blit(
@@ -603,14 +602,14 @@ class Game:
 
         Scoreboard(self.score).run()
         self.score = 0
- 
+
     def run(self):
         start_menu = Menu(["start", "quit"], self)
         start_menu.run()
         while not self.close_game:
             for event in pg.event.get():
-                if event.type == pg.QUIT: 
-                        self.close_game = True
+                if event.type == pg.QUIT:
+                    self.close_game = True
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         Menu(["resume", "quit"], self).run()
@@ -623,15 +622,15 @@ class Game:
             if self.score > self.old_score + DIFFICULTY_SCORE_BARRIER:
                 self.old_score = self.score
                 fac = ASTEROID_SPAWN_FACTOR*ASTEROID_SPAWN_FACTOR
-                self.asteroid_spawn_delay = self.asteroid_spawn_delay*fac 
+                self.asteroid_spawn_delay = self.asteroid_spawn_delay*fac
 
             past_time = time() - self.t_asteroid_was_spawned
-            if (past_time >= self.asteroid_spawn_delay):
+            if past_time >= self.asteroid_spawn_delay:
                 self.spawn_astroids(1)
                 self.t_asteroid_was_spawned = time()
 
             laser = self.player.shoot_laser()
-            if laser != None:
+            if laser is not None:
                 self.lasers.add(laser)
                 self.sprites.add(laser)
 
@@ -648,7 +647,7 @@ class Game:
 
 
 ASTEROID_SPAWN_FACTOR = 0.99
-DIFFICULTY_SCORE_BARRIER = 100 
+DIFFICULTY_SCORE_BARRIER = 100
 PU_CHANCE = 300
 FPS = 60
 WIDTH = 1280
