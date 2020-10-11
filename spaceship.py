@@ -1,3 +1,4 @@
+#sudo apt-get install python3-pygame
 from random import randint, choice
 from time import sleep, time
 import sqlite3
@@ -176,7 +177,7 @@ class Asteroid(pg.sprite.Sprite):
 class Menu:
     def __init__(self, texts, game_obj):
         self.texts = texts
-        self.space = 100
+        self.space = WIDTH//13
         self.max_height = self.space*(len(texts))
         self.option = 0
         self.alt = True
@@ -188,7 +189,7 @@ class Menu:
     def draw_menu(self):
         self.bg.run()
         rects = []
-        style = pg.font.SysFont('Comic Sans MS', 100)
+        style = pg.font.SysFont('Comic Sans MS', WIDTH//10)
         center_text = lambda x: (
                 (WIDTH - rects[x].width)//2,
                 x*self.space + (HEIGHT - self.max_height)//2)
@@ -557,17 +558,17 @@ class Game:
             self.astroids.add(asteroid)
 
     def draw_hud(self):
-        disp.blit(pg.font.SysFont('Comic Sans MS', 30).render(
-            'HEALTH', False, (255,255,255)),(30,30))
+        disp.blit(pg.font.SysFont('Comic Sans MS', HEIGHT*30//720).render(
+            'HEALTH', False, (255,255,255)),(WIDTH*30//1280,HEIGHT*30//720))
 
         if self.player.health > 0:
             pg.draw.rect(
                 disp,
                 (255,255,255),
-                [30,55,(WIDTH//300)*self.player.health,40])
+                [WIDTH*30//1280,HEIGHT*55//720,(WIDTH//300)*self.player.health,HEIGHT*40//720])
 
         score = pg.font.SysFont(
-            'Comic Sans MS', 114).render(
+            'Comic Sans MS', HEIGHT*114//720).render(
                 ("SCORE: " + str(self.score)),
                 False,
                 (255,255,255))
@@ -588,7 +589,7 @@ class Game:
         self.sprites.add(self.player)
 
         for i in range(250,0,-5):
-            text = pg.font.SysFont('Comic Sans MS', 200).render(
+            text = pg.font.SysFont('Comic Sans MS', HEIGHT*200//720).render(
                     'GAME OVER', False, (255,255,255))
             text.set_alpha(i)
             rect = text.get_rect()
@@ -651,7 +652,7 @@ DIFFICULTY_SCORE_BARRIER = 100
 PU_CHANCE = 300
 FPS = 60
 WIDTH = 1280
-HEIGHT = 720
+HEIGHT = 720 
 clock = pg.time.Clock()
 pg.init()
 disp = pg.display.set_mode([WIDTH, HEIGHT])
