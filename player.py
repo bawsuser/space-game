@@ -91,6 +91,11 @@ class Player(pg.sprite.Sprite):
 class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
         super().__init__()
+        
+        sound_effect_channel = pg.mixer.Channel(1)
+        sound_effect = pg.mixer.Sound("sounds/laser.mp3")
+        sound_effect_channel.play(sound_effect)
+        
         self.image = pg.transform.scale(
             pg.Surface((20, 20)), (WIDTH//100, WIDTH//100))
         self.image.fill((255, 255, 255))

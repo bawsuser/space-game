@@ -56,6 +56,11 @@ class Game:
 
                 if hits_ship is not None:
                     self.player.health -= damage_points(elem.size)
+                    
+                    sound_effect_channel = pg.mixer.Channel(2)
+                    sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
+                    sound_effect_channel.play(sound_effect)
+                    
                     elem.kill()
 
         def hits_meteor():
@@ -66,6 +71,11 @@ class Game:
                         self.lasers, group, True, pg.sprite.collide_mask)
 
                 if hits_meteor != {}:
+                    
+                    sound_effect_channel = pg.mixer.Channel(2)
+                    sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
+                    sound_effect_channel.play(sound_effect)
+                    
                     self.score += damage_points(elem.size)
                     elem.kill()
 
@@ -74,6 +84,11 @@ class Game:
                     hits_shield = pg.sprite.collide_mask(
                         self.shield, elem)
                     if hits_shield is not None:
+                        
+                        sound_effect_channel = pg.mixer.Channel(2)
+                        sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
+                        sound_effect_channel.play(sound_effect)
+                        
                         self.score += damage_points(elem.size)
                         elem.kill()
 
@@ -88,22 +103,37 @@ class Game:
                     string = elem.img
                     elem.kill()
                     if "shield" in string:
+                        
+                        sound_effect_channel = pg.mixer.Channel(2)
+                        sound_effect = pg.mixer.Sound("sounds/shield.mp3")
+                        sound_effect_channel.play(sound_effect)
+                        
                         if self.time_shield_col == 0:
+                        
                             self.shield = Shield(self.player)
                             self.sprites.add(self.shield)
                             self.time_shield_col = time()
 
                     if "health" in string:
+                        
+                        sound_effect_channel = pg.mixer.Channel(2)
+                        sound_effect = pg.mixer.Sound("sounds/shield.mp3")
+                        sound_effect_channel.play(sound_effect)
+
                         if self.player.health + 10 > 100:
                             self.player.health = 100
                         else:
                             self.player.health += 10
 
                     if "speed2" in string:
+                        
+                        sound_effect_channel = pg.mixer.Channel(2)
+                        sound_effect = pg.mixer.Sound("sounds/speed2.mp3")
+                        sound_effect_channel.play(sound_effect)
+                        
                         if self.time_speed2_col == 0:
                             self.player.shoot_d = self.player.shoot_d/2
                             self.time_speed2_col = time()
-
 
                 if time() > time() - self.time_shield_col >= 10:
                     self.shield.kill_shield()
@@ -122,6 +152,11 @@ class Game:
                     self.player, group, False, pg.sprite.collide_mask)
 
                 if hits_coin != []:
+                    
+                    sound_effect_channel = pg.mixer.Channel(2)
+                    sound_effect = pg.mixer.Sound("sounds/coin.mp3")
+                    sound_effect_channel.play(sound_effect)
+                    
                     self.score += 1500
                     elem.kill()
         
@@ -199,10 +234,10 @@ class Game:
     def run(self):
         start_menu = Menu(["start", "quit"], self)
         start_menu.run()
-        
+       
         music_file = "sounds/synth.mp3"
         pg.mixer.music.load(music_file)
-        pg.mixer.music.play(-1, randint(1,7200), 1000)
+        pg.mixer.music.play(-1, randint(1,7200), 2000)
         
         while not self.close_game:    
             for event in pg.event.get():
