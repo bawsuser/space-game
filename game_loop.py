@@ -117,7 +117,7 @@ class Game:
                     if "health" in string:
                         
                         sound_effect_channel = pg.mixer.Channel(2)
-                        sound_effect = pg.mixer.Sound("sounds/shield.mp3")
+                        sound_effect = pg.mixer.Sound("sounds/health.mp3")
                         sound_effect_channel.play(sound_effect)
 
                         if self.player.health + 10 > 100:
@@ -250,6 +250,7 @@ class Game:
                         
             pg.mixer.music.unpause()
             if self.player.health <= 0:
+                pg.mixer.music.stop()
                 self.game_over()
                 start_menu.close_menu = False
                 start_menu.run()
@@ -280,6 +281,7 @@ class Game:
             self.draw_hud()
             pg.display.flip()
             clock.tick(FPS)
-
+        
+        
 Game().run()
 pg.quit()
