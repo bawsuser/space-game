@@ -254,6 +254,7 @@ class Game:
                 self.game_over()
                 start_menu.close_menu = False
                 start_menu.run()
+                pg.mixer.music.play(-1, randint(1,7200), 2000)
 
             if self.score > self.old_score + DIFFICULTY_SCORE_BARRIER:
                 self.old_score = self.score
