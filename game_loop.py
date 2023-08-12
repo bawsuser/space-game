@@ -122,7 +122,7 @@ class Game:
                     self.player, group, False, pg.sprite.collide_mask)
 
                 if hits_coin != []:
-                    self.score += 100
+                    self.score += 1500
                     elem.kill()
         
         hits_ship()
@@ -199,14 +199,21 @@ class Game:
     def run(self):
         start_menu = Menu(["start", "quit"], self)
         start_menu.run()
-        while not self.close_game:
+        
+        music_file = "sounds/synth.mp3"
+        pg.mixer.music.load(music_file)
+        pg.mixer.music.play(-1, randint(1,7200), 1000)
+        
+        while not self.close_game:    
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.close_game = True
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
+                        pg.mixer.music.pause()
                         Menu(["resume", "quit"], self).run()
-
+                        
+            pg.mixer.music.unpause()
             if self.player.health <= 0:
                 self.game_over()
                 start_menu.close_menu = False
