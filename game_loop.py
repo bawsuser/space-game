@@ -56,8 +56,6 @@ class Game:
 
                 if hits_ship is not None:
                     self.player.health -= damage_points(elem.size)
-                    
-                    sound_effect_channel = pg.mixer.Channel(2)
                     sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
                     sound_effect_channel.play(sound_effect)
                     
@@ -71,8 +69,6 @@ class Game:
                         self.lasers, group, True, pg.sprite.collide_mask)
 
                 if hits_meteor != {}:
-                    
-                    sound_effect_channel = pg.mixer.Channel(2)
                     sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
                     sound_effect_channel.play(sound_effect)
                     
@@ -84,8 +80,6 @@ class Game:
                     hits_shield = pg.sprite.collide_mask(
                         self.shield, elem)
                     if hits_shield is not None:
-                        
-                        sound_effect_channel = pg.mixer.Channel(2)
                         sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
                         sound_effect_channel.play(sound_effect)
                         
@@ -103,8 +97,6 @@ class Game:
                     string = elem.img
                     elem.kill()
                     if "shield" in string:
-                        
-                        sound_effect_channel = pg.mixer.Channel(2)
                         sound_effect = pg.mixer.Sound("sounds/shield.mp3")
                         sound_effect_channel.play(sound_effect)
                         
@@ -115,8 +107,6 @@ class Game:
                             self.time_shield_col = time()
 
                     if "health" in string:
-                        
-                        sound_effect_channel = pg.mixer.Channel(2)
                         sound_effect = pg.mixer.Sound("sounds/health.mp3")
                         sound_effect_channel.play(sound_effect)
 
@@ -126,8 +116,6 @@ class Game:
                             self.player.health += 10
 
                     if "speed2" in string:
-                        
-                        sound_effect_channel = pg.mixer.Channel(2)
                         sound_effect = pg.mixer.Sound("sounds/speed2.mp3")
                         sound_effect_channel.play(sound_effect)
                         
@@ -152,14 +140,13 @@ class Game:
                     self.player, group, False, pg.sprite.collide_mask)
 
                 if hits_coin != []:
-                    
-                    sound_effect_channel = pg.mixer.Channel(2)
                     sound_effect = pg.mixer.Sound("sounds/coin.mp3")
                     sound_effect_channel.play(sound_effect)
                     
                     self.score += 1500
                     elem.kill()
-        
+
+        sound_effect_channel = pg.mixer.Channel(2)
         hits_ship()
         hits_meteor()
         hits_powerup()
