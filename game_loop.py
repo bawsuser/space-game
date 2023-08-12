@@ -6,6 +6,7 @@ from BgMove import BgMove
 from scoreboard import Scoreboard
 from powerups import Powerup, Shield
 from player import Player
+from coin import Coin
 
 
 class Game:
@@ -24,6 +25,7 @@ class Game:
         self.sprites = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
         self.powerups = pg.sprite.Group()
+        self.coins = pg.sprite.Group()
 
         self.shield = None
         self.score = 0
@@ -112,15 +114,33 @@ class Game:
                     self.time_speed2_col = 0
                     self.player.shoot_d = self.player.shoot_d*2
 
+        def hits_coin():
+            for elem in self.coins:
+                group = pg.sprite.Group()
+                group.add(elem)
+                hits_coin = pg.sprite.spritecollide(
+                    self.player, group, False, pg.sprite.collide_mask)
+
+                if hits_coin != []:
+                    self.score += 100
+                    elem.kill()
+        
         hits_ship()
         hits_meteor()
         hits_powerup()
+        hits_coin()
 
     def spawn_powerups(self):
         if randint(0, PU_CHANCE) == 1:
             powerup = Powerup(choice(self.pu_list))
             self.sprites.add(powerup)
             self.powerups.add(powerup)
+
+    def spawn_coins(self):
+        if randint(0, COIN_CHANCE) == 1:
+            coin = Coin()
+            self.sprites.add(coin)
+            self.coins.add(coin)
 
     def spawn_astroids(self, blob_size):
         angle_speed = list(range(-5,0)) + list(range(1,6))
@@ -156,7 +176,7 @@ class Game:
         self.player.angle = 0
         self.player.rect = self.player.orig.get_rect(
         center=self.player.disp_rect.center)
-        for attr in ('astroids', 'lasers', 'powerups', 'sprites'):
+        for attr in ('coins', 'astroids', 'lasers', 'powerups', 'sprites'):
             getattr(self, attr).empty()
         self.sprites.add(self.player)
 
@@ -209,6 +229,7 @@ class Game:
 
             self.player.control()
             self.spawn_powerups()
+            self.spawn_coins()
             disp.fill((0,0,0))
             self.bg.run()
             self.collisions()
