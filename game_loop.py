@@ -7,6 +7,7 @@ from scoreboard import Scoreboard
 from powerups import Powerup, Shield
 from player import Player
 from coin import Coin
+from enemy import Enemy
 
 
 class Game:
@@ -24,6 +25,7 @@ class Game:
         self.astroids = pg.sprite.Group()
         self.sprites = pg.sprite.Group()
         self.lasers = pg.sprite.Group()
+        self.enemy_lasers = pg.sprite.Group()
         self.powerups = pg.sprite.Group()
         self.coins = pg.sprite.Group()
 
@@ -38,6 +40,9 @@ class Game:
                 "pixelart/health.png",
                 "pixelart/speed2.png"
                 ]
+
+        # enemy
+        self.spawn_enemy = True
 
     def collisions(self):
         def damage_points(size):
@@ -258,6 +263,20 @@ class Game:
                 self.lasers.add(laser)
                 self.sprites.add(laser)
 
+            # ENEMY SECTION
+            if self.spawn_enemy:
+                setattr(self, "enemy", Enemy(WIDTH//400, 5))
+                self.sprites.add(self.enemy)
+
+            enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
+            print(self.player.rect.center)
+            if enemy_laser is not None:
+                self.enemy_lasers.add(enemy_laser)
+                self.sprites.add(enemy_laser)
+            
+            self.spawn_enemy = False
+            # ENEMY SECTION
+                
             self.player.control()
             self.spawn_powerups()
             self.spawn_coins()
