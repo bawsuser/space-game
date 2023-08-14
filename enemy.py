@@ -1,4 +1,5 @@
 from main import *
+from random import choice
 import math
 
 class Enemy(pg.sprite.Sprite):
@@ -15,11 +16,8 @@ class Enemy(pg.sprite.Sprite):
 
         # axis move attr
         self.speed = speed
-        self.x_increase = 0
-        self.y_increase = 0
 
         # angle move attr
-        self.angle_speed = angle_speed
         self.angle_increase = 0
         self.angle = 0
 
@@ -28,36 +26,31 @@ class Enemy(pg.sprite.Sprite):
         self.shoot_t_old = 0
         self.shoot_t_now = self.shoot_d
 
-        self.r = randint(1,4)
+        self.spawn_edge = choice(["top", "bottom", "left", "right"])
 
-        if self.r == 1:
+        if self.spawn_edge == "left":
             self.rect.x = -self.rect.width
             self.rect.y = randint(0,HEIGHT-self.rect.height)
-        elif self.r == 2:
+        elif self.spawn_edge == "right":
             self.speed = -self.speed
-            self.rect.x = WIDTH
+            self.rect.x = WIDTH-self.rect.width
             self.rect.y = randint(0,HEIGHT-self.rect.height)
-        elif self.r == 3:
+        elif self.spawn_edge == "bottom":
             self.speed = -self.speed
-            self.rect.y = HEIGHT
+            self.rect.y = HEIGHT-self.rect.height
             self.rect.x = randint(0,WIDTH-self.rect.width)
         else:
             self.rect.y = -self.rect.height
             self.rect.x = randint(0,WIDTH-self.rect.width)
 
     def shoot_at_player_and_move(self, player_position):
-        # Calculate the angle between the enemy and the player
         angle_to_player = math.atan2(
             player_position[0] - self.rect.centerx,
             player_position[1] - self.rect.centery
         )
-        # 4 ANGLES POSSIBLE
-        # Convert angle to degrees and adjust
         self.angle = math.degrees(angle_to_player) + 180
-
-        # Shoot the laser using your existing logic
         laser = self.shoot_laser()
-        if self.r > 2:
+        if self.spawn_edge == "top" or self.spawn_edge == "bottom":
             self.rect.y += self.speed
         else:
             self.rect.x += self.speed
@@ -89,8 +82,6 @@ class Enemy(pg.sprite.Sprite):
         elif HEIGHT < self.rect.top:
             self.rect.bottom = 0
 
-        self.rect.centerx += self.x_increase
-        self.rect.centery += self.y_increase
         self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)

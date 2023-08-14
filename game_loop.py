@@ -151,11 +151,21 @@ class Game:
                     self.score += 1500
                     elem.kill()
 
+        def enemy_laser_hits_ship():
+            for elem in self.enemy_lasers:
+                hits_ship = pg.sprite.collide_mask(
+                        self.player, elem)
+
+                if hits_ship is not None:
+                    self.player.health -= 10
+                    elem.kill()
+
         sound_effect_channel = pg.mixer.Channel(2)
         hits_ship()
         hits_meteor()
         hits_powerup()
         hits_coin()
+        enemy_laser_hits_ship() # enemy uncomment for damage
 
     def spawn_powerups(self):
         if randint(0, PU_CHANCE) == 1:
@@ -263,19 +273,38 @@ class Game:
                 self.lasers.add(laser)
                 self.sprites.add(laser)
 
+            ###############
             # ENEMY SECTION
+            ###############
+                    
             if self.spawn_enemy:
+                setattr(self, "enemy_spawned_time", time())
                 setattr(self, "enemy", Enemy(WIDTH//400, 5))
                 self.sprites.add(self.enemy)
-
-            enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
-            #print(self.player.rect.center)
-            if enemy_laser is not None:
-                self.enemy_lasers.add(enemy_laser)
-                self.sprites.add(enemy_laser)
+                self.spawn_enemy = False
+                setattr(self, "enemy_alive", True)
             
-            self.spawn_enemy = False
+            # if enemy shoot kill obj => self.spawn_enemy = True
+            if self.enemy_alive:
+                enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
+                if enemy_laser is not None:
+                    self.enemy_lasers.add(enemy_laser)
+                    self.sprites.add(enemy_laser)
+                for elem in self.lasers:
+                    if self.enemy_alive:
+                        if pg.sprite.collide_mask(self.enemy, elem):
+                            setattr(self, "enemy_alive", False)
+                            self.enemy.kill()
+                            del self.enemy
+                        
+            if 6 <= (time() - self.enemy_spawned_time) and not self.enemy_alive:
+                self.spawn_enemy = True
+                del self.enemy_spawned_time
+
+            self.player.health = 100 # usefull dont forget comment out
+            ###############
             # ENEMY SECTION
+            ###############
                 
             self.player.control()
             self.spawn_powerups()

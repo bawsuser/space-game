@@ -7,7 +7,6 @@ import pygame as pg
 #from game_loop import Game
 from game_loop import *
 
-
 ASTEROID_SPAWN_FACTOR = 0.99
 DIFFICULTY_SCORE_BARRIER = 100
 PU_CHANCE = 300
