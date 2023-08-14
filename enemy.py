@@ -6,7 +6,7 @@ class Enemy(pg.sprite.Sprite):
         super().__init__()
         ship_img = pg.transform.scale(
                 pg.image.load(
-                    "pixelart/enemy_ship_1.png"), (WIDTH//10, WIDTH//10))
+                    "pixelart/enemy_ship_" + str(randint(1,4)) + ".png"), (WIDTH//10, WIDTH//10))
         self.orig = ship_img
         self.image = self.orig
         self.disp_rect = disp.get_rect()
@@ -111,7 +111,7 @@ class Laser(pg.sprite.Sprite):
 
         # move attr
         self.angle = angle
-        self.speed = WIDTH//40
+        self.speed = WIDTH//80
 
     def update(self):
         if self.rect.y < 0 or self.rect.y > HEIGHT:

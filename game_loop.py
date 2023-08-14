@@ -269,7 +269,7 @@ class Game:
                 self.sprites.add(self.enemy)
 
             enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
-            print(self.player.rect.center)
+            #print(self.player.rect.center)
             if enemy_laser is not None:
                 self.enemy_lasers.add(enemy_laser)
                 self.sprites.add(enemy_laser)
