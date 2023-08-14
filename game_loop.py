@@ -231,6 +231,7 @@ class Game:
             sleep(0.03)
 
         Scoreboard(self.score).run()
+        self.spawn_enemy = True
         self.score = 0
 
     def run(self):
@@ -299,7 +300,7 @@ class Game:
                 self.spawn_enemy = True
                 del self.enemy_spawned_time
 
-            self.player.health = 100 # usefull dont forget comment out
+            #self.player.health = 100 # usefull dont forget comment out
             ###############
             # ENEMY SECTION
             ###############
