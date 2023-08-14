@@ -151,6 +151,14 @@ class Game:
                     self.score += 1500
                     elem.kill()
 
+        def shield_hits_enemy_laser():
+            if self.shield is not None:
+                for elem in self.enemy_lasers:
+                    hits_shield = pg.sprite.collide_mask(
+                        self.shield, elem)
+                    if hits_shield is not None:
+                        elem.kill()
+        
         def enemy_laser_hits_ship():
             for elem in self.enemy_lasers:
                 hits_ship = pg.sprite.collide_mask(
@@ -165,6 +173,7 @@ class Game:
         hits_meteor()
         hits_powerup()
         hits_coin()
+        shield_hits_enemy_laser()
         enemy_laser_hits_ship() # enemy uncomment for damage
 
     def spawn_powerups(self):
