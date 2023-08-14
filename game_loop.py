@@ -287,15 +287,13 @@ class Game:
             # if enemy shoot kill obj => self.spawn_enemy = True
             if self.enemy_alive:
                 enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
-                if enemy_laser is not None:
+                if enemy_laser:
                     self.enemy_lasers.add(enemy_laser)
                     self.sprites.add(enemy_laser)
-                for elem in self.lasers:
-                    if self.enemy_alive:
-                        if pg.sprite.collide_mask(self.enemy, elem):
-                            setattr(self, "enemy_alive", False)
-                            self.enemy.kill()
-                            del self.enemy
+
+                if pg.sprite.spritecollide(self.enemy, self.lasers, False, pg.sprite.collide_mask):
+                    self.enemy_alive = False
+                    self.enemy.kill()
                         
             if 6 <= (time() - self.enemy_spawned_time) and not self.enemy_alive:
                 self.spawn_enemy = True
