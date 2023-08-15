@@ -1,7 +1,7 @@
 from main import *
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, speed, angle_speed):
+    def __init__(self, speed, angle_speed, disp):
         super().__init__()
         ship_img = pg.transform.scale(
                 pg.image.load(

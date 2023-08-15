@@ -2,14 +2,15 @@ from main import *
 from BgMove import BgMove
 
 class Menu:
-    def __init__(self, texts, game_obj):
+    def __init__(self, texts, game_obj, disp):
+        self.disp = disp
         self.texts = texts
         self.space = WIDTH//13
         self.max_height = self.space*(len(texts))
         self.option = 0
         self.alt = True
         self.opacity = 100
-        self.bg = BgMove()
+        self.bg = BgMove(self.disp)
         self.close_menu = False
         self.game_obj = game_obj
 
@@ -25,13 +26,13 @@ class Menu:
             text = style.render(self.texts[i], False, (0,0,255))
             rects.append(text.get_rect())
             if self.option != i:
-                disp.blit(text, center_text(i))
+                self.disp.blit(text, center_text(i))
 
         text_bg = style.render(self.texts[self.option], False, (255,255,0))
         text = style.render(self.texts[self.option], False, (255,255,255))
         text.set_alpha(self.opacity)
-        disp.blit(text_bg, center_text(self.option))
-        disp.blit(text, center_text(self.option))
+        self.disp.blit(text_bg, center_text(self.option))
+        self.disp.blit(text, center_text(self.option))
         blink_speed = 4
         if self.alt:
             self.opacity += blink_speed

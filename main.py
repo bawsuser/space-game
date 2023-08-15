@@ -19,7 +19,7 @@ HEIGHT = 720
 # runs game from spaceship.py
 clock = pg.time.Clock()
 pg.init()
-disp = pg.display.set_mode([WIDTH, HEIGHT])
+#disp = pg.display.set_mode([WIDTH, HEIGHT]) screen muss übergeben werden
 
 # program submenu for resolution and fullscreen
 

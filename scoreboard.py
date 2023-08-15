@@ -2,11 +2,12 @@ from main import *
 from BgMove import BgMove
 
 class Scoreboard:
-    def __init__(self, score):
+    def __init__(self, score, disp):
+        self.disp = disp
         self.name = ""
         self.score = score
         self.score_list = []
-        self.bg = BgMove()
+        self.bg = BgMove(self.disp)
         self.close_insert_name = False
         self.close_scoreboard = False
 
@@ -31,7 +32,7 @@ class Scoreboard:
         req_surface = font.render("YOUR NAME", True, color)
         w = req_surface.get_width()
         h = req_surface.get_height()
-        disp.blit(req_surface, ((WIDTH - w)//2, (HEIGHT - h)//2 - int(h*0.8)))
+        self.disp.blit(req_surface, ((WIDTH - w)//2, (HEIGHT - h)//2 - int(h*0.8)))
 
         # input field
         font = pg.font.Font(None, 64*HEIGHT//720)
@@ -42,10 +43,10 @@ class Scoreboard:
                 (WIDTH - w)//2, (HEIGHT - h)//2 + int(h*0.8), 10, 10)
         name_box.w = w
         name_box.h = h
-        disp.blit(
+        self.disp.blit(
                 name_surface,
                 (name_box.x + 5*WIDTH//1280, name_box.y + 5*HEIGHT//720))
-        pg.draw.rect(disp, color, name_box, 1)
+        pg.draw.rect(self.disp, color, name_box, 1)
 
     def edit_db_scores(self):
         def create_table():
@@ -101,7 +102,7 @@ class Scoreboard:
         text = head_style.render("HIGHSCORES", False, (255, 255, 0))
         rect_h = text.get_rect()
         head_height = rect_h.height
-        disp.blit(text, ((WIDTH - rect_h.width)//2, 50))
+        self.disp.blit(text, ((WIDTH - rect_h.width)//2, 50))
 
         # list
         space = 100*HEIGHT//720
@@ -120,7 +121,7 @@ class Scoreboard:
                     + str(score) , False, (255,255,255))
             rect = text.get_rect()
             rects.append(rect)
-            disp.blit(text, center_text(i))
+            self.disp.blit(text, center_text(i))
 
     def run(self):
         while not self.close_insert_name:

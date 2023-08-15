@@ -3,7 +3,7 @@ from random import choice
 import math
 
 class Enemy(pg.sprite.Sprite):
-    def __init__(self, speed, angle_speed):
+    def __init__(self, speed, angle_speed, disp):
         super().__init__()
         ship_img = pg.transform.scale(
                 pg.image.load(
@@ -33,11 +33,11 @@ class Enemy(pg.sprite.Sprite):
             self.rect.y = randint(0,HEIGHT-self.rect.height)
         elif self.spawn_edge == "right":
             self.speed = -self.speed
-            self.rect.x = WIDTH-self.rect.width
+            self.rect.x = WIDTH
             self.rect.y = randint(0,HEIGHT-self.rect.height)
         elif self.spawn_edge == "bottom":
             self.speed = -self.speed
-            self.rect.y = HEIGHT-self.rect.height
+            self.rect.y = HEIGHT
             self.rect.x = randint(0,WIDTH-self.rect.width)
         else:
             self.rect.y = -self.rect.height

@@ -18,8 +18,8 @@ class Game:
         self.time_shield_col = 0
 
         # some game objs
-        self.player = Player(WIDTH//75, 5)
-        self.bg = BgMove()
+        self.player = Player(WIDTH//75, 5, disp)
+        self.bg = BgMove(disp)
 
         # sprite groups
         self.astroids = pg.sprite.Group()
@@ -239,12 +239,12 @@ class Game:
             pg.display.flip()
             sleep(0.03)
 
-        Scoreboard(self.score).run()
+        Scoreboard(self.score, disp).run()
         self.spawn_enemy = True
         self.score = 0
 
     def run(self):
-        start_menu = Menu(["start", "quit"], self)
+        start_menu = Menu(["start", "quit"], self, disp)
         start_menu.run()
        
         music_file = "sounds/synth.mp3"
@@ -258,7 +258,7 @@ class Game:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         pg.mixer.music.pause()
-                        Menu(["resume", "quit"], self).run()
+                        Menu(["resume", "quit"], self, disp).run()
                         
             pg.mixer.music.unpause()
             if self.player.health <= 0:
@@ -289,7 +289,7 @@ class Game:
                     
             if self.spawn_enemy:
                 setattr(self, "enemy_spawned_time", time())
-                setattr(self, "enemy", Enemy(WIDTH//400, 5))
+                setattr(self, "enemy", Enemy(WIDTH//400, 5, disp))
                 self.sprites.add(self.enemy)
                 self.spawn_enemy = False
                 setattr(self, "enemy_alive", True)
@@ -326,6 +326,7 @@ class Game:
             pg.display.flip()
             clock.tick(FPS)
         
-        
+
+disp = pg.display.set_mode([WIDTH, HEIGHT])   
 Game().run()
 pg.quit()
