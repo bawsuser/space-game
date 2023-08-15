@@ -299,7 +299,10 @@ class Game:
                 enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
                 if enemy_laser:
                     self.enemy_lasers.add(enemy_laser)
+                    # Add enemy laser to sprites, ensuring it's drawn beneath the enemy
+                    self.sprites.remove(self.enemy)  # Remove enemy from sprites temporarily
                     self.sprites.add(enemy_laser)
+                    self.sprites.add(self.enemy)  # Add enemy back to ensure correct order
 
                 if pg.sprite.spritecollide(self.enemy, self.lasers, False, pg.sprite.collide_mask):
                     self.enemy_alive = False
