@@ -308,15 +308,15 @@ class Game:
                     self.enemy_alive = False
                     self.enemy.kill()
                         
-            if 6 <= (time() - self.enemy_spawned_time) and not self.enemy_alive:
+            if (28//randint(2,4)) <= (time() - self.enemy_spawned_time) and not self.enemy_alive:
                 self.spawn_enemy = True
                 del self.enemy_spawned_time
 
-            #self.player.health = 100 # usefull dont forget comment out
             ###############
             # ENEMY SECTION
             ###############
-                
+            
+            # self.player.health = 100 # usefull dont forget comment out
             self.player.control()
             self.spawn_powerups()
             self.spawn_coins()

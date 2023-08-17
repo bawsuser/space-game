@@ -1,3 +1,4 @@
+#sudo apt-get install python3-pygame
 from random import randint, choice
 from time import sleep, time
 import sqlite3
@@ -9,7 +10,7 @@ from game_loop import *
 
 ASTEROID_SPAWN_FACTOR = 0.99
 DIFFICULTY_SCORE_BARRIER = 100
-PU_CHANCE = 300
+PU_CHANCE = 150
 COIN_CHANCE = 1500
 FPS = 60
 WIDTH = 1280

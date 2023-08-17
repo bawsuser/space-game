@@ -7,7 +7,7 @@ class Enemy(pg.sprite.Sprite):
         super().__init__()
         ship_img = pg.transform.scale(
                 pg.image.load(
-                    "pixelart/enemy_ship_" + str(randint(1,4)) + ".png"), (WIDTH//10, WIDTH//10))
+                    "pixelart/enemy_ship_" + str(randint(1,7)) + ".png"), (WIDTH//10, WIDTH//10))
         self.orig = ship_img
         self.image = self.orig
         self.disp_rect = disp.get_rect()
