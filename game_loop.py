@@ -4,9 +4,8 @@ from asteroid import Asteroid
 from menu import Menu
 from BgMove import BgMove
 from scoreboard import Scoreboard
-from powerups import Powerup, Shield
+from items import Item, Shield
 from player import Player
-from coin import Coin
 from enemy import Enemy
 
 
@@ -178,13 +177,13 @@ class Game:
 
     def spawn_powerups(self):
         if randint(0, PU_CHANCE) == 1:
-            powerup = Powerup(choice(self.pu_list))
+            powerup = Item(choice(self.pu_list))
             self.sprites.add(powerup)
             self.powerups.add(powerup)
 
     def spawn_coins(self):
         if randint(0, COIN_CHANCE) == 1:
-            coin = Coin()
+            coin = Item("pixelart/coin.png")
             self.sprites.add(coin)
             self.coins.add(coin)
 

@@ -1,6 +1,6 @@
 from main import *
 
-class Powerup(pg.sprite.Sprite):
+class Item(pg.sprite.Sprite):
     def __init__(self, img = "pixelart/speed2.png"):
         super().__init__()
         self.img = img
