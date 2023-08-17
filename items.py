@@ -43,29 +43,27 @@ class Shockwave(pg.sprite.Sprite):
         super().__init__()
         self.player = player_obj
         self.start_time = time()  # Record the start time
-        self.max_radius = WIDTH / 2  # Maximum radius reached within 3 seconds
-        
+        self.max_radius = HEIGHT / 2  # Maximum radius limited to screen height
+        self.max_lifetime = 2.0  # Maximum lifetime in seconds
         self.image = pg.Surface((WIDTH, WIDTH), pg.SRCALPHA)
         self.rect = self.image.get_rect()
 
     def update(self):
         # Calculate the elapsed time
         elapsed_time = time() - self.start_time
-        if elapsed_time >= 3:
-            self.kill()
-        else:
-            # Calculate the exponential scale
-            scale = math.log(elapsed_time + 1) / math.log(4)  # Exponential scale factor
-            
-            current_radius = scale * self.max_radius
-            self.image.fill((0, 0, 0, 0))
-            gfxdraw.filled_circle(
-                self.image, self.rect.centerx - self.player.rect.centerx + WIDTH // 2,
-                self.rect.centery - self.player.rect.centery + WIDTH // 2,
-                int(current_radius), (255, 255, 255, 150))
-            gfxdraw.aacircle(
-                self.image, self.rect.centerx - self.player.rect.centerx + WIDTH // 2,
-                self.rect.centery - self.player.rect.centery + WIDTH // 2,
-                int(current_radius), (0, 0, 0))
-            self.rect = self.image.get_rect(center=self.player.rect.center)
+
+        # Larger steps in scaling to improve performance
+        scale = (elapsed_time + 1) / 2  # Linear scale factor with larger steps
+
+        current_radius = min(scale * self.max_radius, self.max_radius)  # Limit to max_radius
+        self.image.fill((0, 0, 0, 0))
+        gfxdraw.filled_circle(
+            self.image, self.rect.centerx - self.player.rect.centerx + WIDTH // 2,
+            self.rect.centery - self.player.rect.centery + WIDTH // 2,
+            int(current_radius), (255, 255, 255, 150))
+        gfxdraw.aacircle(
+            self.image, self.rect.centerx - self.player.rect.centerx + WIDTH // 2,
+            self.rect.centery - self.player.rect.centery + WIDTH // 2,
+            int(current_radius), (0, 0, 0))
+        self.rect = self.image.get_rect(center=self.player.rect.center)
 

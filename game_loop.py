@@ -190,6 +190,11 @@ class Game:
                     self.player.health -= 10
                     elem.kill()
 
+        def remove_expired_shockwave():
+            if hasattr(self, "shockshield") and time() - self.shockshield.start_time >= self.shockshield.max_lifetime:
+                self.shockshield.kill()
+                delattr(self, "shockshield")
+            
         sound_effect_channel = pg.mixer.Channel(2)
         hits_ship()
         hits_meteor()
@@ -197,6 +202,7 @@ class Game:
         hits_coin()
         shield_hits_enemy_laser()
         enemy_laser_hits_ship() # enemy uncomment for damage
+        remove_expired_shockwave()
 
     def spawn_powerups(self):
         if randint(0, PU_CHANCE) == 1:
@@ -327,6 +333,9 @@ class Game:
                     self.sprites.add(self.enemy)  # Add enemy back to ensure correct order
 
                 if pg.sprite.spritecollide(self.enemy, self.lasers, False, pg.sprite.collide_mask):
+                    self.enemy_alive = False
+                    self.enemy.kill()
+                if hasattr(self, "shockshield") and pg.sprite.collide_mask(self.enemy, self.shockshield):
                     self.enemy_alive = False
                     self.enemy.kill()
                         
