@@ -51,8 +51,9 @@ class Shockwave(pg.sprite.Sprite):
     def update(self):
         # Calculate the elapsed time
         elapsed_time = time() - self.start_time
-
-        # Larger steps in scaling to improve performance
+        if elapsed_time > self.max_lifetime:
+            self.kill()  # Remove the sprite from the sprite group and kill it
+            return        # Larger steps in scaling to improve performance
         scale = (elapsed_time + 1) / 2  # Linear scale factor with larger steps
 
         current_radius = min(scale * self.max_radius, self.max_radius)  # Limit to max_radius
