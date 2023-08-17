@@ -4,7 +4,7 @@ from asteroid import Asteroid
 from menu import Menu
 from BgMove import BgMove
 from scoreboard import Scoreboard
-from items import Item, Shield
+from items import Item, Shield, Shockwave
 from player import Player
 from enemy import Enemy
 
@@ -37,7 +37,8 @@ class Game:
         self.pu_list= [
                 "pixelart/shield.png",
                 "pixelart/health.png",
-                "pixelart/speed2.png"
+                "pixelart/speed2.png",
+                "pixelart/shockwave.png"
                 ]
 
         # enemy
@@ -66,6 +67,18 @@ class Game:
                     elem.kill()
 
         def hits_meteor():
+            def shields(shield):
+                if shield is not None:
+                    for elem in self.astroids:
+                        hits_shield = pg.sprite.collide_mask(
+                            shield, elem)
+                        if hits_shield is not None:
+                            sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
+                            sound_effect_channel.play(sound_effect)
+                            
+                            self.score += damage_points(elem.size)
+                            elem.kill()
+                            
             for elem in self.astroids:
                 group = pg.sprite.Group()
                 group.add(elem)
@@ -78,17 +91,12 @@ class Game:
                     
                     self.score += damage_points(elem.size)
                     elem.kill()
+                    
+            shields(self.shield)
+            if hasattr(self, "shockshield"):
+                shields(self.shockshield)
 
-            if self.shield is not None:
-                for elem in self.astroids:
-                    hits_shield = pg.sprite.collide_mask(
-                        self.shield, elem)
-                    if hits_shield is not None:
-                        sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
-                        sound_effect_channel.play(sound_effect)
-                        
-                        self.score += damage_points(elem.size)
-                        elem.kill()
+
 
         def hits_powerup():
             for elem in self.powerups:
@@ -127,6 +135,13 @@ class Game:
                             self.player.shoot_d = self.player.shoot_d/2
                             self.time_speed2_col = time()
 
+                    if "shockwave" in string:
+                        setattr(self, "shockshield", Shockwave(self.player))
+                        self.sprites.add(self.shockshield)
+                        sound_effect = pg.mixer.Sound("sounds/shockwave.mp3")
+                        sound_effect_channel.play(sound_effect)
+                        pass
+
                 if time() > time() - self.time_shield_col >= 10:
                     self.shield.kill_shield()
                     self.shield = None
@@ -157,6 +172,14 @@ class Game:
                         self.shield, elem)
                     if hits_shield is not None:
                         elem.kill()
+                        
+            if hasattr(self, "shockshield"):
+                for elem in self.enemy_lasers:
+                    hits_shield = pg.sprite.collide_mask(
+                        self.shockshield, elem)
+                    if hits_shield is not None:
+                        elem.kill()
+                        
         
         def enemy_laser_hits_ship():
             for elem in self.enemy_lasers:
