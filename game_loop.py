@@ -5,7 +5,7 @@ from menu import Menu
 from BgMove import BgMove
 from scoreboard import Scoreboard
 from items import Item, Shield, Shockwave
-from player import Player
+from player import Player, Laser
 from enemy import Enemy
 
 
@@ -38,11 +38,14 @@ class Game:
                 "pixelart/shield.png",
                 "pixelart/health.png",
                 "pixelart/speed2.png",
-                "pixelart/shockwave.png"
+                "pixelart/shockwave.png",
+                "pixelart/4dirshoot.png"
                 ]
 
         # enemy
         self.spawn_enemy = True
+        
+        self.last_shot_time = time()
 
     def collisions(self):
         def damage_points(size):
@@ -140,7 +143,10 @@ class Game:
                         self.sprites.add(self.shockshield)
                         sound_effect = pg.mixer.Sound("sounds/shockwave.mp3")
                         sound_effect_channel.play(sound_effect)
-                        pass
+
+                    if "4dirshoot" in string:
+                        setattr(self, "fourdirshoot", True)
+                        setattr(self, "starttime", time())
 
                 if time() > time() - self.time_shield_col >= 10:
                     self.shield.kill_shield()
@@ -203,6 +209,24 @@ class Game:
         shield_hits_enemy_laser()
         enemy_laser_hits_ship() # enemy uncomment for damage
         remove_expired_shockwave()
+
+        def lasers(angle): 
+            laser = Laser(angle)
+            laser.rect.centerx = self.player.rect.centerx
+            laser.rect.bottom = self.player.rect.centery
+            self.lasers.add(laser)
+            self.sprites.add(laser)
+
+        if hasattr(self, "starttime") and time()-self.starttime <= 5:
+            current_time = time()
+            time_past = current_time - self.last_shot_time
+            if hasattr(self, "fourdirshoot") and self.fourdirshoot == True and time_past >= 0.2:
+                lasers(self.player.angle)
+                lasers(self.player.angle+90)
+                lasers(self.player.angle+180)
+                lasers(self.player.angle+270)
+                self.last_shot_time = current_time 
+                # spawn 4 shoot with player coordinates, angle
 
     def spawn_powerups(self):
         if randint(0, PU_CHANCE) == 1:
