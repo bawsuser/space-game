@@ -1,6 +1,7 @@
 from main import *
 from random import choice
 import math
+from player import Laser
 
 class Enemy(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed, disp):
@@ -85,34 +86,3 @@ class Enemy(pg.sprite.Sprite):
         self.angle += self.angle_increase
         self.image = pg.transform.rotate(self.orig, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
-
-
-class Laser(pg.sprite.Sprite):
-    def __init__(self, angle):
-        super().__init__()
-        
-        sound_effect_channel = pg.mixer.Channel(1)
-        sound_effect = pg.mixer.Sound("sounds/laser.mp3")
-        sound_effect_channel.play(sound_effect)
-        
-        self.image = pg.transform.scale(
-            pg.Surface((20, 20)), (WIDTH//100, WIDTH//100))
-        self.image.fill((255, 255, 255))
-        self.rect = self.image.get_rect()
-
-        # move attr
-        self.angle = angle
-        self.speed = WIDTH//80
-
-    def update(self):
-        if self.rect.y < 0 or self.rect.y > HEIGHT:
-            self.kill()
-        elif self.rect.x < 0 or self.rect.x > WIDTH:
-            self.kill()
-
-        if self.angle < 0:
-            self.angle += 360
-
-        self.rect.y -= int(self.speed*math.cos(math.radians(self.angle)))
-        self.rect.x -= int(self.speed*math.sin(math.radians(self.angle)))
-

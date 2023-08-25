@@ -266,6 +266,35 @@ class Game:
         rect = score.get_rect()
         disp.blit(score,(WIDTH-rect.width-30, 30))
 
+    def enemy_spawn_and_logic(self):
+        if self.spawn_enemy:
+            setattr(self, "enemy_spawned_time", time())
+            setattr(self, "enemy", Enemy(WIDTH//400, 5, disp))
+            self.sprites.add(self.enemy)
+            self.spawn_enemy = False
+            setattr(self, "enemy_alive", True)
+        
+        # if enemy shoot kill obj => self.spawn_enemy = True
+        if self.enemy_alive:
+            enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
+            if enemy_laser:
+                self.enemy_lasers.add(enemy_laser)
+                # Add enemy laser to sprites, ensuring it's drawn beneath the enemy
+                self.sprites.remove(self.enemy)  # Remove enemy from sprites temporarily
+                self.sprites.add(enemy_laser)
+                self.sprites.add(self.enemy)  # Add enemy back to ensure correct order
+
+            if pg.sprite.spritecollide(self.enemy, self.lasers, False, pg.sprite.collide_mask):
+                self.enemy_alive = False
+                self.enemy.kill()
+            if hasattr(self, "shockshield") and pg.sprite.collide_mask(self.enemy, self.shockshield):
+                self.enemy_alive = False
+                self.enemy.kill()
+                    
+        if (28//randint(2,4)) <= (time() - self.enemy_spawned_time) and not self.enemy_alive:
+            self.spawn_enemy = True
+            del self.enemy_spawned_time
+
     def game_over(self):
         img = pg.image.load("pixelart/space.png").convert_alpha()
         bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
@@ -335,42 +364,7 @@ class Game:
                 self.lasers.add(laser)
                 self.sprites.add(laser)
 
-            ###############
-            # ENEMY SECTION
-            ###############
-                    
-            if self.spawn_enemy:
-                setattr(self, "enemy_spawned_time", time())
-                setattr(self, "enemy", Enemy(WIDTH//400, 5, disp))
-                self.sprites.add(self.enemy)
-                self.spawn_enemy = False
-                setattr(self, "enemy_alive", True)
-            
-            # if enemy shoot kill obj => self.spawn_enemy = True
-            if self.enemy_alive:
-                enemy_laser = self.enemy.shoot_at_player_and_move(self.player.rect.center)
-                if enemy_laser:
-                    self.enemy_lasers.add(enemy_laser)
-                    # Add enemy laser to sprites, ensuring it's drawn beneath the enemy
-                    self.sprites.remove(self.enemy)  # Remove enemy from sprites temporarily
-                    self.sprites.add(enemy_laser)
-                    self.sprites.add(self.enemy)  # Add enemy back to ensure correct order
-
-                if pg.sprite.spritecollide(self.enemy, self.lasers, False, pg.sprite.collide_mask):
-                    self.enemy_alive = False
-                    self.enemy.kill()
-                if hasattr(self, "shockshield") and pg.sprite.collide_mask(self.enemy, self.shockshield):
-                    self.enemy_alive = False
-                    self.enemy.kill()
-                        
-            if (28//randint(2,4)) <= (time() - self.enemy_spawned_time) and not self.enemy_alive:
-                self.spawn_enemy = True
-                del self.enemy_spawned_time
-
-            ###############
-            # ENEMY SECTION
-            ###############
-            
+            self.enemy_spawn_and_logic()
             # self.player.health = 100 # usefull dont forget comment out
             self.player.control()
             self.spawn_powerups()
