@@ -44,7 +44,7 @@ class Shockwave(pg.sprite.Sprite):
         self.player = player_obj
         self.start_time = time()  # Record the start time
         self.max_radius = HEIGHT / 2  # Maximum radius limited to screen height
-        self.max_lifetime = 2.0  # Maximum lifetime in seconds
+        self.max_lifetime = 1.0  # Maximum lifetime in seconds
         self.image = pg.Surface((WIDTH, WIDTH), pg.SRCALPHA)
         self.rect = self.image.get_rect()
 

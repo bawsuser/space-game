@@ -45,7 +45,7 @@ class Game:
         # enemy
         self.spawn_enemy = True
         
-        self.last_shot_time = time()
+        self.last_4dir_shot_time = time()
 
     def collisions(self):
         def damage_points(size):
@@ -219,13 +219,13 @@ class Game:
 
         if hasattr(self, "starttime") and time()-self.starttime <= 5:
             current_time = time()
-            time_past = current_time - self.last_shot_time
+            time_past = current_time - self.last_4dir_shot_time
             if hasattr(self, "fourdirshoot") and self.fourdirshoot == True and time_past >= 0.2:
                 lasers(self.player.angle)
                 lasers(self.player.angle+90)
                 lasers(self.player.angle+180)
                 lasers(self.player.angle+270)
-                self.last_shot_time = current_time 
+                self.last_4dir_shot_time = current_time 
                 # spawn 4 shoot with player coordinates, angle
 
     def spawn_powerups(self):
