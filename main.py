@@ -16,8 +16,9 @@ DIFFICULTY_SCORE_BARRIER = 100
 PU_CHANCE = 150
 COIN_CHANCE = 1500
 FPS = 60
-WIDTH = 1280
-HEIGHT = 720
+
+import settings as _sett
+WIDTH, HEIGHT = _sett.get_resolution()
 
 # runs pg from here
 # runs game from spaceship.py

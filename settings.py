@@ -2,7 +2,15 @@ import json
 import os
 
 _PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.json')
-RESOLUTIONS = [(1280, 720), (1920, 1080), (2560, 1440)]
+
+# All common 16:9 resolutions up to 4K. Index 0 is the default (720p = fast).
+RESOLUTIONS = [
+    (1280,  720),   # 0  HD
+    (1600,  900),   # 1  HD+
+    (1920, 1080),   # 2  Full HD
+    (2560, 1440),   # 3  QHD
+    (3840, 2160),   # 4  4K UHD
+]
 _DEFAULTS = {'fullscreen': True, 'res_index': 0}
 
 
@@ -24,15 +32,23 @@ def save(data):
         json.dump(data, f, indent=2)
 
 
-def make_display(pg):
-    """Create (or recreate) the pygame display surface from saved settings."""
-    d = load()
-    w, h = RESOLUTIONS[d['res_index']]
-    if d['fullscreen']:
+def get_resolution(data=None):
+    """Return (width, height) for the current (or given) settings dict."""
+    if data is None:
+        data = load()
+    return RESOLUTIONS[data['res_index']]
+
+
+def make_display(pg, data=None):
+    """Create (or recreate) the pygame display surface from settings."""
+    if data is None:
+        data = load()
+    w, h = get_resolution(data)
+    if data['fullscreen']:
         try:
-            return pg.display.set_mode([1280, 720], pg.FULLSCREEN | pg.SCALED)
+            return pg.display.set_mode([w, h], pg.FULLSCREEN | pg.SCALED)
         except pg.error:
-            pass  # fall through to windowed on headless / Wayland edge cases
+            pass  # fall through on headless / Wayland edge cases
     try:
         return pg.display.set_mode([w, h], pg.SCALED)
     except pg.error:

@@ -88,19 +88,20 @@ class SettingsMenu:
         """on_close(new_disp) called with recreated display when user leaves."""
         self.disp = disp
         self.on_close = on_close
-        self.data = _sett.load()
+        self._saved = _sett.load()
+        self.data = dict(self._saved)
         self.bg = BgMove(disp)
         self.option = 0
         self.closed = False
 
     def _options(self):
         fs = 'ON' if self.data['fullscreen'] else 'OFF'
-        if self.data['fullscreen']:
-            res_str = '(fullscreen)'
-        else:
-            w, h = _sett.RESOLUTIONS[self.data['res_index']]
-            res_str = f'{w}x{h}'
-        return [f'FULLSCREEN: {fs}', f'RESOLUTION: {res_str}', 'BACK']
+        w, h = _sett.RESOLUTIONS[self.data['res_index']]
+        res_label = f'{w}x{h}'
+        return [f'FULLSCREEN: {fs}', f'RESOLUTION: {res_label}', 'BACK']
+
+    def _res_changed(self):
+        return self.data['res_index'] != self._saved['res_index']
 
     def control(self):
         for event in pg.event.get():
@@ -122,21 +123,22 @@ class SettingsMenu:
         selected = opts[self.option]
         if 'FULLSCREEN' in selected:
             self.data['fullscreen'] = not self.data['fullscreen']
-        elif 'RESOLUTION' in selected and not self.data['fullscreen']:
+        elif 'RESOLUTION' in selected:
             self.data['res_index'] = (self.data['res_index'] + 1) % len(_sett.RESOLUTIONS)
         elif selected == 'BACK':
             self._back()
 
     def _back(self):
         _sett.save(self.data)
-        new_disp = _sett.make_display(pg)
+        new_disp = _sett.make_display(pg, self.data)
         self.on_close(new_disp)
         self.closed = True
 
     def draw(self):
         self.bg.run()
         title_font = get_font('Comic Sans MS', HEIGHT * 80 // 720)
-        opt_font = get_font('Comic Sans MS', WIDTH // 14)
+        opt_font   = get_font('Comic Sans MS', WIDTH // 14)
+        hint_font  = get_font('Comic Sans MS', WIDTH // 28)
         opts = self._options()
 
         title = title_font.render('SETTINGS', False, (255, 255, 0))
@@ -150,6 +152,11 @@ class SettingsMenu:
             color = (255, 255, 0) if i == self.option else (0, 0, 255)
             surf = opt_font.render(opt, False, color)
             self.disp.blit(surf, ((WIDTH - surf.get_width()) // 2, start_y + i * space))
+
+        # Show restart hint only when resolution was changed
+        if self._res_changed():
+            hint = hint_font.render('restart to apply resolution', False, (180, 180, 180))
+            self.disp.blit(hint, ((WIDTH - hint.get_width()) // 2, HEIGHT - HEIGHT // 8))
 
     def run(self):
         while not self.closed:
