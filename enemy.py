@@ -6,10 +6,9 @@ from player import Laser
 class Enemy(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed, disp):
         super().__init__()
-        ship_img = pg.transform.scale(
-                pg.image.load(
-                    "pixelart/enemy_ship_" + str(randint(1,7)) + ".png"), (WIDTH//10, WIDTH//10))
-        self.orig = ship_img
+        self.orig = pg.transform.scale(
+            get_image("pixelart/enemy_ship_" + str(randint(1,7)) + ".png"),
+            (WIDTH//10, WIDTH//10))
         self.image = self.orig
         self.disp_rect = disp.get_rect()
         self.rect = self.orig.get_rect(center=self.disp_rect.center)
@@ -21,6 +20,7 @@ class Enemy(pg.sprite.Sprite):
         # angle move attr
         self.angle_increase = 0
         self.angle = 0
+        self._last_angle = 0
 
         # shoot attr
         self.shoot_d = 1
@@ -84,5 +84,7 @@ class Enemy(pg.sprite.Sprite):
             self.rect.bottom = 0
 
         self.angle += self.angle_increase
-        self.image = pg.transform.rotate(self.orig, self.angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        if self.angle != self._last_angle:
+            self.image = pg.transform.rotate(self.orig, self.angle)
+            self.rect = self.image.get_rect(center=self.rect.center)
+            self._last_angle = self.angle

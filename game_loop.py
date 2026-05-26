@@ -44,164 +44,113 @@ class Game:
 
         # enemy
         self.spawn_enemy = True
-        
+
         self.last_4dir_shot_time = time()
 
-    def collisions(self):
-        def damage_points(size):
-            damage_dict = {
-                7: 15,
-                8: 10,
-                9: 5
-                }
+        # pre-rendered/cached HUD assets (HEALTH label is static, score font reused)
+        self._hud_health_label = get_font('Comic Sans MS', HEIGHT*30//720).render(
+            'HEALTH', False, (255, 255, 255))
+        self._hud_score_font = get_font('Comic Sans MS', HEIGHT*114//720)
 
+    def collisions(self):
+        damage_dict = {7: 15, 8: 10, 9: 5}
+        def damage_points(size):
             return damage_dict[size]
 
-        def hits_ship():
-            for elem in self.astroids:
-                hits_ship = pg.sprite.collide_mask(
-                        self.player, elem)
+        sound_effect_channel = pg.mixer.Channel(2)
+        snd_explosion = get_sound("sounds/explosion.mp3")
 
-                if hits_ship is not None:
-                    self.player.health -= damage_points(elem.size)
-                    sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
-                    sound_effect_channel.play(sound_effect)
-                    
-                    elem.kill()
+        def hits_ship():
+            for elem in pg.sprite.spritecollide(
+                    self.player, self.astroids, True, pg.sprite.collide_mask):
+                self.player.health -= damage_points(elem.size)
+                sound_effect_channel.play(snd_explosion)
 
         def hits_meteor():
-            def shields(shield):
-                if shield is not None:
-                    for elem in self.astroids:
-                        hits_shield = pg.sprite.collide_mask(
-                            shield, elem)
-                        if hits_shield is not None:
-                            sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
-                            sound_effect_channel.play(sound_effect)
-                            
-                            self.score += damage_points(elem.size)
-                            elem.kill()
-                            
-            for elem in self.astroids:
-                group = pg.sprite.Group()
-                group.add(elem)
-                hits_meteor = pg.sprite.groupcollide(
-                        self.lasers, group, True, pg.sprite.collide_mask)
-
-                if hits_meteor != {}:
-                    sound_effect = pg.mixer.Sound("sounds/explosion.mp3")
-                    sound_effect_channel.play(sound_effect)
-                    
+            for laser, asteroids_hit in pg.sprite.groupcollide(
+                    self.lasers, self.astroids, True, True).items():
+                for elem in asteroids_hit:
+                    sound_effect_channel.play(snd_explosion)
                     self.score += damage_points(elem.size)
-                    elem.kill()
-                    
-            shields(self.shield)
-            if hasattr(self, "shockshield"):
-                shields(self.shockshield)
 
-
+            shockshield = getattr(self, "shockshield", None)
+            for shield in (self.shield, shockshield):
+                if shield is None:
+                    continue
+                for elem in pg.sprite.spritecollide(
+                        shield, self.astroids, True, pg.sprite.collide_mask):
+                    sound_effect_channel.play(snd_explosion)
+                    self.score += damage_points(elem.size)
 
         def hits_powerup():
-            for elem in self.powerups:
-                group = pg.sprite.Group()
-                group.add(elem)
-                hit_powerup = pg.sprite.spritecollide(
-                    self.player, group, False, pg.sprite.collide_mask)
+            for elem in pg.sprite.spritecollide(
+                    self.player, self.powerups, True, pg.sprite.collide_mask):
+                string = elem.img
+                if "shield" in string:
+                    sound_effect_channel.play(get_sound("sounds/shield.mp3"))
+                    if self.time_shield_col == 0:
+                        self.shield = Shield(self.player)
+                        self.sprites.add(self.shield)
+                        self.time_shield_col = time()
 
-                if hit_powerup != []:
-                    string = elem.img
-                    elem.kill()
-                    if "shield" in string:
-                        sound_effect = pg.mixer.Sound("sounds/shield.mp3")
-                        sound_effect_channel.play(sound_effect)
-                        
-                        if self.time_shield_col == 0:
-                        
-                            self.shield = Shield(self.player)
-                            self.sprites.add(self.shield)
-                            self.time_shield_col = time()
+                if "health" in string:
+                    sound_effect_channel.play(get_sound("sounds/health.mp3"))
+                    if self.player.health + 10 > 100:
+                        self.player.health = 100
+                    else:
+                        self.player.health += 10
 
-                    if "health" in string:
-                        sound_effect = pg.mixer.Sound("sounds/health.mp3")
-                        sound_effect_channel.play(sound_effect)
+                if "speed2" in string:
+                    sound_effect_channel.play(get_sound("sounds/speed2.mp3"))
+                    if self.time_speed2_col == 0:
+                        self.player.shoot_d = self.player.shoot_d/2
+                        self.time_speed2_col = time()
 
-                        if self.player.health + 10 > 100:
-                            self.player.health = 100
-                        else:
-                            self.player.health += 10
+                if "shockwave" in string:
+                    setattr(self, "shockshield", Shockwave(self.player))
+                    self.sprites.add(self.shockshield)
+                    sound_effect_channel.play(get_sound("sounds/shockwave.mp3"))
 
-                    if "speed2" in string:
-                        sound_effect = pg.mixer.Sound("sounds/speed2.mp3")
-                        sound_effect_channel.play(sound_effect)
-                        
-                        if self.time_speed2_col == 0:
-                            self.player.shoot_d = self.player.shoot_d/2
-                            self.time_speed2_col = time()
+                if "4dirshoot" in string:
+                    setattr(self, "fourdirshoot", True)
+                    setattr(self, "starttime", time())
 
-                    if "shockwave" in string:
-                        setattr(self, "shockshield", Shockwave(self.player))
-                        self.sprites.add(self.shockshield)
-                        sound_effect = pg.mixer.Sound("sounds/shockwave.mp3")
-                        sound_effect_channel.play(sound_effect)
-
-                    if "4dirshoot" in string:
-                        setattr(self, "fourdirshoot", True)
-                        setattr(self, "starttime", time())
-
-                if time() > time() - self.time_shield_col >= 10:
+            # Timer expirys belong outside the powerup loop so the shield/speed
+            # buff actually expires even when no powerup is on screen.
+            if self.time_shield_col != 0 and time() - self.time_shield_col >= 10:
+                if self.shield is not None:
                     self.shield.kill_shield()
-                    self.shield = None
-                    self.time_shield_col = 0
+                self.shield = None
+                self.time_shield_col = 0
 
-                if time() > time() - self.time_speed2_col >= 3:
-                    self.time_speed2_col = 0
-                    self.player.shoot_d = self.player.shoot_d*2
+            if self.time_speed2_col != 0 and time() - self.time_speed2_col >= 3:
+                self.time_speed2_col = 0
+                self.player.shoot_d = self.player.shoot_d*2
 
         def hits_coin():
-            for elem in self.coins:
-                group = pg.sprite.Group()
-                group.add(elem)
-                hits_coin = pg.sprite.spritecollide(
-                    self.player, group, False, pg.sprite.collide_mask)
-
-                if hits_coin != []:
-                    sound_effect = pg.mixer.Sound("sounds/coin.mp3")
-                    sound_effect_channel.play(sound_effect)
-                    
-                    self.score += 1500
-                    elem.kill()
+            for _ in pg.sprite.spritecollide(
+                    self.player, self.coins, True, pg.sprite.collide_mask):
+                sound_effect_channel.play(get_sound("sounds/coin.mp3"))
+                self.score += 1500
 
         def shield_hits_enemy_laser():
             if self.shield is not None:
-                for elem in self.enemy_lasers:
-                    hits_shield = pg.sprite.collide_mask(
-                        self.shield, elem)
-                    if hits_shield is not None:
-                        elem.kill()
-                        
+                pg.sprite.spritecollide(
+                    self.shield, self.enemy_lasers, True, pg.sprite.collide_mask)
             if hasattr(self, "shockshield"):
-                for elem in self.enemy_lasers:
-                    hits_shield = pg.sprite.collide_mask(
-                        self.shockshield, elem)
-                    if hits_shield is not None:
-                        elem.kill()
-                        
-        
-        def enemy_laser_hits_ship():
-            for elem in self.enemy_lasers:
-                hits_ship = pg.sprite.collide_mask(
-                        self.player, elem)
+                pg.sprite.spritecollide(
+                    self.shockshield, self.enemy_lasers, True, pg.sprite.collide_mask)
 
-                if hits_ship is not None:
-                    self.player.health -= 10
-                    elem.kill()
+        def enemy_laser_hits_ship():
+            for _ in pg.sprite.spritecollide(
+                    self.player, self.enemy_lasers, True, pg.sprite.collide_mask):
+                self.player.health -= 10
 
         def remove_expired_shockwave():
             if hasattr(self, "shockshield") and time() - self.shockshield.start_time >= self.shockshield.max_lifetime:
                 self.shockshield.kill()
                 delattr(self, "shockshield")
-            
-        sound_effect_channel = pg.mixer.Channel(2)
+
         hits_ship()
         hits_meteor()
         hits_powerup()
@@ -248,8 +197,7 @@ class Game:
             self.astroids.add(asteroid)
 
     def draw_hud(self):
-        disp.blit(pg.font.SysFont('Comic Sans MS', HEIGHT*30//720).render(
-            'HEALTH', False, (255,255,255)),(WIDTH*30//1280,HEIGHT*30//720))
+        disp.blit(self._hud_health_label, (WIDTH*30//1280, HEIGHT*30//720))
 
         if self.player.health > 0:
             pg.draw.rect(
@@ -257,14 +205,10 @@ class Game:
                 (255,255,255),
                 [WIDTH*30//1280,HEIGHT*55//720,(WIDTH//300)*self.player.health,HEIGHT*40//720])
 
-        score = pg.font.SysFont(
-            'Comic Sans MS', HEIGHT*114//720).render(
-                ("SCORE: " + str(self.score)),
-                False,
-                (255,255,255))
-
+        score = self._hud_score_font.render(
+            "SCORE: " + str(self.score), False, (255, 255, 255))
         rect = score.get_rect()
-        disp.blit(score,(WIDTH-rect.width-30, 30))
+        disp.blit(score, (WIDTH-rect.width-30, 30))
 
     def enemy_spawn_and_logic(self):
         if self.spawn_enemy:
@@ -296,8 +240,7 @@ class Game:
             del self.enemy_spawned_time
 
     def game_over(self):
-        img = pg.image.load("pixelart/space.png").convert_alpha()
-        bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+        bg = pg.transform.scale(get_image("pixelart/space.png"), (WIDTH, HEIGHT*2))
         self.asteroid_spawn_delay = 1
         self.player.health = 100
         self.player.angle = 0
@@ -307,16 +250,14 @@ class Game:
             getattr(self, attr).empty()
         self.sprites.add(self.player)
 
-        for i in range(250,0,-5):
-            text = pg.font.SysFont('Comic Sans MS', HEIGHT*200//720).render(
-                    'GAME OVER', False, (255,255,255))
+        text = get_font('Comic Sans MS', HEIGHT*200//720).render(
+            'GAME OVER', False, (255, 255, 255))
+        rect = text.get_rect()
+        text_pos = ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2)
+        for i in range(250, 0, -5):
             text.set_alpha(i)
-            rect = text.get_rect()
             disp.blit(bg, (0, 0))
-            disp.blit(
-                    text,
-                    ((WIDTH - rect.width)//2, (HEIGHT - rect.height)//2))
-
+            disp.blit(text, text_pos)
             pg.display.flip()
             sleep(0.03)
 
@@ -332,7 +273,7 @@ class Game:
         pg.mixer.music.load(music_file)
         pg.mixer.music.play(-1, randint(1,7200), 2000)
         
-        while not self.close_game:    
+        while not self.close_game:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.close_game = True
@@ -340,8 +281,8 @@ class Game:
                     if event.key == pg.K_ESCAPE:
                         pg.mixer.music.pause()
                         Menu(["resume", "quit"], self, disp).run()
-                        
-            pg.mixer.music.unpause()
+                        pg.mixer.music.unpause()
+
             if self.player.health <= 0:
                 pg.mixer.music.stop()
                 self.game_over()

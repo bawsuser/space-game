@@ -5,8 +5,8 @@ class BgMove:
     def __init__(self, disp):
         self.disp = disp
         self.bg_ctr = -HEIGHT
-        img = pg.image.load("pixelart/space.png").convert_alpha()
-        self.bg = pg.transform.scale(img, (WIDTH, HEIGHT*2))
+        self.bg = pg.transform.scale(
+            get_image("pixelart/space.png"), (WIDTH, HEIGHT*2))
 
     def run(self):
         self.bg_ctr += 7

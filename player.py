@@ -3,10 +3,8 @@ from main import *
 class Player(pg.sprite.Sprite):
     def __init__(self, speed, angle_speed, disp):
         super().__init__()
-        ship_img = pg.transform.scale(
-                pg.image.load(
-                    "pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
-        self.orig = ship_img
+        self.orig = pg.transform.scale(
+            get_image("pixelart/space_ship.png"), (WIDTH//10, WIDTH//10))
         self.image = self.orig
         self.disp_rect = disp.get_rect()
         self.rect = self.orig.get_rect(center=self.disp_rect.center)
@@ -21,6 +19,7 @@ class Player(pg.sprite.Sprite):
         self.angle_speed = angle_speed
         self.angle_increase = 0
         self.angle = 0
+        self._last_angle = 0  # tracks what angle self.image is currently rotated to
 
         # shoot attr
         self.shoot = False
@@ -84,17 +83,19 @@ class Player(pg.sprite.Sprite):
         self.rect.centerx += self.x_increase
         self.rect.centery += self.y_increase
         self.angle += self.angle_increase
-        self.image = pg.transform.rotate(self.orig, self.angle)
-        self.rect = self.image.get_rect(center=self.rect.center)
+        # Only re-rotate when the angle actually changed — pg.transform.rotate
+        # is expensive and runs every frame in the original code.
+        if self.angle != self._last_angle:
+            self.image = pg.transform.rotate(self.orig, self.angle)
+            self.rect = self.image.get_rect(center=self.rect.center)
+            self._last_angle = self.angle
 
 
 class Laser(pg.sprite.Sprite):
     def __init__(self, angle):
         super().__init__()
-        
-        sound_effect_channel = pg.mixer.Channel(1)
-        sound_effect = pg.mixer.Sound("sounds/laser.mp3")
-        sound_effect_channel.play(sound_effect)
+
+        pg.mixer.Channel(1).play(get_sound("sounds/laser.mp3"))
         
         self.image = pg.transform.scale(
             pg.Surface((20, 20)), (WIDTH//100, WIDTH//100))

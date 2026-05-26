@@ -6,7 +6,7 @@ class Asteroid(pg.sprite.Sprite):
         self.size = randint(7,9)
         x = WIDTH//self.size
         self.orig = pg.transform.scale(
-            pg.image.load("pixelart/meteor.png"), (x,x)).convert_alpha()
+            get_image("pixelart/meteor.png"), (x, x))
         self.image = self.orig
         self.rect = self.orig.get_rect()
 
