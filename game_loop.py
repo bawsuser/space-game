@@ -1,12 +1,13 @@
 #sudo apt-get install python3-pygame
 from main import *
 from asteroid import Asteroid
-from menu import Menu
+from menu import Menu, SettingsMenu
 from BgMove import BgMove
 from scoreboard import Scoreboard
 from items import Item, Shield, Shockwave
 from player import Player, Laser
 from enemy import Enemy
+import settings as _sett
 
 
 class Game:
@@ -266,7 +267,7 @@ class Game:
         self.score = 0
 
     def run(self):
-        start_menu = Menu(["start", "quit"], self, disp)
+        start_menu = Menu(["start", "settings", "quit"], self, disp)
         start_menu.run()
        
         music_file = "sounds/synth.mp3"
@@ -320,6 +321,6 @@ class Game:
             clock.tick(FPS)
         
 
-disp = pg.display.set_mode([WIDTH, HEIGHT])   
+disp = _sett.make_display(pg)
 Game().run()
 pg.quit()
