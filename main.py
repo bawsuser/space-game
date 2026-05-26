@@ -1,4 +1,7 @@
 #sudo apt-get install python3-pygame
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 from random import randint, choice
 from time import sleep, time
 import sqlite3
