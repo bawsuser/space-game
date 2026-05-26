@@ -59,6 +59,48 @@ Alle Sprites und der Game-Loop nutzen diese — **niemals** direkt `pg.image.loa
 
 ---
 
+## Geplante Features / Ideen
+
+### Idempotenter Installer + `spacegame`-Alias
+
+Ein `install.sh` das man beliebig oft laufen lassen kann ohne Schaden anzurichten:
+
+```bash
+#!/usr/bin/env bash
+set -e
+GAME_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV="$GAME_DIR/.venv"
+
+# venv anlegen falls nicht vorhanden
+[ -d "$VENV" ] || python3 -m venv "$VENV"
+
+# pygame installieren (pip prüft selbst ob schon aktuell)
+"$VENV/bin/pip" install --quiet pygame
+
+# alias in ~/.bashrc eintragen (idempotent per grep-Guard)
+ALIAS_LINE="alias spacegame='$VENV/bin/python $GAME_DIR/main.py'"
+grep -qxF "$ALIAS_LINE" ~/.bashrc || echo "$ALIAS_LINE" >> ~/.bashrc
+
+echo "Fertig. Starte eine neue Shell oder: source ~/.bashrc"
+echo "Dann: spacegame"
+```
+
+Aufruf: `bash install.sh` — danach `spacegame` von überall.
+Hinweis: `.venv` in `.gitignore` aufnehmen.
+
+### Auflösungs- und Fullscreen-Menü
+
+Im Startmenü vor dem Spiel ein Untermenü einbauen:
+
+- Auflösungen zur Auswahl (z.B. 1280×720, 1920×1080, 2560×1440)
+- Fullscreen-Toggle (an/aus)
+- Auswahl in einer Datei (`settings.json` o.ä.) speichern und beim nächsten Start laden
+- `pg.display.set_mode([W, H], pg.FULLSCREEN)` für Fullscreen
+
+Dafür müssen WIDTH/HEIGHT von Konstanten zu Variablen werden — aktuell sind sie hartcodiert in `main.py` und werden via `from main import *` in alle Module gezogen. Besser vorher die `config.py`-Refaktorierung angehen (siehe Architektur-TODOs unten), damit WIDTH/HEIGHT sauber überschrieben werden können.
+
+---
+
 ## Bekannte technische Schulden / TODOs
 
 ### Architektur
