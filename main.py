@@ -17,13 +17,12 @@ PU_CHANCE = 150
 COIN_CHANCE = 1500
 FPS = 60
 
-import settings as _sett
-WIDTH, HEIGHT = _sett.get_resolution()
-
-# runs pg from here
-# runs game from spaceship.py
+# pg.init() must run before settings.load(pg) so get_desktop_sizes() works
 clock = pg.time.Clock()
 pg.init()
+
+import settings as _sett
+WIDTH, HEIGHT = _sett.get_resolution(_sett.load(pg))
 
 # asset caches — load each file/font once and reuse.
 # Loading sounds/images from disk every frame was the main cause of stuttering.
