@@ -3,9 +3,13 @@
 ## Starten
 
 ```bash
-/tmp/spacegame_venv/bin/python main.py
-# oder nach pipenv install:
-pipenv run python main.py
+# Nach install.sh (einmalig ausführen):
+bash install.sh
+source ~/.bashrc
+spacegame        # von überall startbar
+
+# Oder direkt:
+.venv/bin/python main.py
 ```
 
 Einstiegspunkt ist immer `main.py` — **nicht** `game_loop.py` direkt aufrufen (funktioniert wegen des zirkulären Imports nicht).
@@ -22,11 +26,15 @@ enemy.py         — class Enemy
 asteroid.py      — class Asteroid
 items.py         — class Item, class Shield, class Shockwave
 BgMove.py        — scrollender Hintergrund
-menu.py          — Start- und Pause-Menü
+menu.py          — class Menu, class SettingsMenu
 scoreboard.py    — Highscore-Eingabe und -Anzeige (SQLite)
+settings.py      — load/save settings.json, Display-Erstellung, Auto-Detection
+install.sh       — idempotenter Installer (venv + spacegame-Alias)
+settings.json    — gespeicherte Nutzereinstellungen (fullscreen, res_index)
 scores.db        — SQLite-Datenbank für Highscores
 pixelart/        — alle Sprite-Bilder
 sounds/          — alle Soundeffekte + Musik
+.venv/           — Python-Virtualenv (nicht im Repo, per .gitignore)
 ```
 
 ---
@@ -39,13 +47,13 @@ Das Projekt nutzt einen absichtlichen zirkulären Import-Trick:
 - `game_loop.py` macht `from main import *` (Zeile 1)
 - Alle anderen Module machen ebenfalls `from main import *`
 
-Das funktioniert **nur** wenn `python main.py` als Einstiegspunkt genutzt wird. Python lädt `main.py` dann zweimal: einmal als `__main__` und einmal als Modul `main`. Das Modul `main` wird vollständig geladen (inkl. Konstanten und Asset-Cache), bevor `game_loop.py` weitermacht. Klingt verrückt, funktioniert aber.
+Das funktioniert **nur** wenn `python main.py` als Einstiegspunkt genutzt wird. Python lädt `main.py` dann zweimal: einmal als `__main__` und einmal als Modul `main`. Das Modul `main` wird vollständig geladen (inkl. Konstanten und Asset-Cache), bevor `game_loop.py` weitermacht.
 
-`disp` (das Display-Surface) wird am Ende von `game_loop.py` (Zeile 323) gesetzt, **bevor** `Game()` instanziiert wird.
+`disp` (das Display-Surface) wird am Ende von `game_loop.py` gesetzt, **bevor** `Game()` instanziiert wird.
 
 ---
 
-## Asset-Cache (seit dieser Session)
+## Asset-Cache
 
 In `main.py` gibt es drei Hilfsfunktionen die je Asset nur einmal laden:
 
@@ -55,49 +63,45 @@ get_sound(path)      # pg.mixer.Sound, gecacht
 get_font(name, size) # pg.font.SysFont, gecacht
 ```
 
-Alle Sprites und der Game-Loop nutzen diese — **niemals** direkt `pg.image.load()` / `pg.mixer.Sound()` / `pg.font.SysFont()` aufrufen, sonst kehrt das Ruckeln zurück.
+**Niemals** direkt `pg.image.load()` / `pg.mixer.Sound()` / `pg.font.SysFont()` aufrufen — sonst kehrt das Ruckeln zurück (Disk-I/O pro Frame).
 
 ---
 
-## Geplante Features / Ideen
+## Display & Settings (`settings.py`)
 
-### Idempotenter Installer + `spacegame`-Alias
+Auflösung und Fullscreen werden in `settings.json` gespeichert.
 
-Ein `install.sh` das man beliebig oft laufen lassen kann ohne Schaden anzurichten:
-
-```bash
-#!/usr/bin/env bash
-set -e
-GAME_DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV="$GAME_DIR/.venv"
-
-# venv anlegen falls nicht vorhanden
-[ -d "$VENV" ] || python3 -m venv "$VENV"
-
-# pygame installieren (pip prüft selbst ob schon aktuell)
-"$VENV/bin/pip" install --quiet pygame
-
-# alias in ~/.bashrc eintragen (idempotent per grep-Guard)
-ALIAS_LINE="alias spacegame='$VENV/bin/python $GAME_DIR/main.py'"
-grep -qxF "$ALIAS_LINE" ~/.bashrc || echo "$ALIAS_LINE" >> ~/.bashrc
-
-echo "Fertig. Starte eine neue Shell oder: source ~/.bashrc"
-echo "Dann: spacegame"
+```python
+RESOLUTIONS = [
+    (1280,  720),   # HD
+    (1600,  900),   # HD+
+    (1920, 1080),   # Full HD
+    (2560, 1440),   # QHD
+    (3840, 2160),   # 4K UHD
+]
 ```
 
-Aufruf: `bash install.sh` — danach `spacegame` von überall.
-Hinweis: `.venv` in `.gitignore` aufnehmen.
+**Erster Start (kein `settings.json`)**: `pg.display.get_desktop_sizes()` erkennt die native Monitorauflösung automatisch und wählt den besten passenden Eintrag (max. 4K).
 
-### Auflösungs- und Fullscreen-Menü
+**Display-Erstellung** nutzt immer `pg.SCALED`:
+- Fullscreen: `set_mode([w, h], FULLSCREEN | SCALED)` — rendert bei gewählter Auflösung, füllt den Bildschirm
+- Windowed: `set_mode([w, h], SCALED)` — Fenster in gewählter Größe
 
-Im Startmenü vor dem Spiel ein Untermenü einbauen:
+`pg.SCALED` bedeutet: die Spiellogik arbeitet immer auf der gewählten Auflösung, die GPU skaliert transparent.
 
-- Auflösungen zur Auswahl (z.B. 1280×720, 1920×1080, 2560×1440)
-- Fullscreen-Toggle (an/aus)
-- Auswahl in einer Datei (`settings.json` o.ä.) speichern und beim nächsten Start laden
-- `pg.display.set_mode([W, H], pg.FULLSCREEN)` für Fullscreen
+**Settings-Menü**: Im Startmenü → `settings` → Fullscreen-Toggle gilt sofort, Auflösungsänderung gilt beim nächsten Start (Hinweis wird eingeblendet).
 
-Dafür müssen WIDTH/HEIGHT von Konstanten zu Variablen werden — aktuell sind sie hartcodiert in `main.py` und werden via `from main import *` in alle Module gezogen. Besser vorher die `config.py`-Refaktorierung angehen (siehe Architektur-TODOs unten), damit WIDTH/HEIGHT sauber überschrieben werden können.
+---
+
+## pygame-ce statt pygame
+
+Das Projekt nutzt **pygame-ce** (Community Edition) statt dem Original-pygame:
+
+```bash
+pip install pygame-ce   # nicht: pip install pygame
+```
+
+pygame-ce ist ein Drop-in-Ersatz (`import pygame` bleibt gleich) mit GPU-beschleunigtem Blitting via SDL2 — wichtig für gute Performance bei höheren Auflösungen wie 4K. Kein Code musste für den Wechsel geändert werden.
 
 ---
 
@@ -105,36 +109,34 @@ Dafür müssen WIDTH/HEIGHT von Konstanten zu Variablen werden — aktuell sind 
 
 ### Architektur
 
-- **Zirkulärer Import auflösen**: Konstanten (WIDTH, HEIGHT, FPS etc.) in eine eigene `config.py` auslagern. Dann braucht kein Modul mehr `from main import *`.
-- **`disp` als Global**: Das Display-Surface wird in `game_loop.py` als Modul-Global gesetzt und von allen Klassen genutzt. Sauberer wäre es, es durchzureichen oder als Singleton zu kapseln.
-- **`hasattr`/`setattr`/`delattr` ersetzen**: `shockshield`, `enemy`, `fourdirshoot`, `starttime`, `enemy_spawned_time`, `enemy_alive` werden mit `setattr` dynamisch gesetzt. Stattdessen saubere Klassen-Attribute mit Default `None` in `__init__` definieren.
+- **Zirkulärer Import auflösen**: Konstanten (WIDTH, HEIGHT, FPS etc.) in eine eigene `config.py` auslagern. Dann braucht kein Modul mehr `from main import *`. Würde auch dynamische Auflösungsänderung ohne Neustart ermöglichen.
+- **`disp` als Global**: Das Display-Surface wird in `game_loop.py` als Modul-Global gesetzt. Sauberer wäre es, es durchzureichen oder als Singleton zu kapseln.
+- **`hasattr`/`setattr`/`delattr` ersetzen**: `shockshield`, `enemy`, `fourdirshoot`, `starttime`, `enemy_spawned_time`, `enemy_alive` werden dynamisch gesetzt. Stattdessen saubere Attribute mit Default `None` in `__init__`.
+- **Auflösungsänderung ohne Neustart**: Aktuell gilt eine neue Auflösung erst nach Neustart, weil WIDTH/HEIGHT beim Import gesetzt werden. Lösbar durch `config.py`-Refactor.
 
 ### Bugs / Spiellogik
 
-- **SQL-Injection in `scoreboard.py`**: `insert_name()` baut den SQL-String per String-Concatenation zusammen. Auf parameterisierte Queries umstellen: `c.execute("INSERT INTO scores (name, score) VALUES (?, ?)", (self.name, self.score))`.
-- **Enemy-Laser-Kollision**: `spritecollide(self.enemy, self.lasers, False, ...)` — der Player-Laser wird bei Treffer nicht gekillt (`dokill=False`). Wahrscheinlich unbeabsichtigt.
+- **SQL-Injection in `scoreboard.py`**: `insert_name()` baut SQL per String-Concatenation. Fix: `c.execute("INSERT INTO scores (name, score) VALUES (?, ?)", (self.name, self.score))`.
+- **Enemy-Laser-Kollision**: `spritecollide(self.enemy, self.lasers, False, ...)` — Player-Laser wird bei Treffer nicht gekillt (`dokill=False`). Wahrscheinlich unbeabsichtigt.
 
 ### Performance (noch offen)
 
-- **Asteroid-Rotation**: Asteroiden rotieren jeden Frame (`angle_speed` ist immer ≠ 0). Man könnte Rotationen auf feste Winkelschritte (z.B. 5°) einrasten, um gecachte `Surface`-Objekte wiederzuverwenden.
-- **`pg.transform.scale` bei Asteroid-Spawn**: Jeder neue Asteroid skaliert das gecachte Bild neu. Die drei möglichen Größen (size 7/8/9) könnten vorab als fertige Surfaces gecacht werden.
-
-### UX
-
-- **Fenstergröße / Fullscreen**: Kein Menü für Auflösung oder Fullscreen (Kommentar in `main.py` Zeile 52 verweist darauf).
-- **`Menu.behaviour()`**: Vergleicht Menü-Optionen über Index (`texts[option] == texts[0]`). Besser direkt den String prüfen (`"quit"`, `"start"` etc.) für Robustheit.
+- **Asteroid-Rotation**: Asteroiden rotieren jeden Frame (angle_speed ist immer ≠ 0). Rotationen auf feste Winkelschritte (z.B. 5°) einrasten → gecachte Surfaces wiederverwenden.
+- **Asteroid-Skalierung beim Spawn**: Jeder neue Asteroid skaliert das gecachte Bild neu. Die drei Größen (size 7/8/9) könnten vorab als fertige Surfaces gecacht werden.
+- **BgMove feste Scrollgeschwindigkeit**: `bg_ctr += 7` ist pixelbasiert, nicht auflösungsrelativ. Bei 4K scrollt der Hintergrund langsamer als bei 720p.
 
 ---
 
-## Performance-Erkenntnisse dieser Session
+## Performance-Erkenntnisse
 
 Benchmark (headless, 500 Frames, kein FPS-Cap):
-- **Vorher**: ~500 FPS-equivalent
-- **Nachher**: ~850 FPS-equivalent (~70% schneller)
+- **Vorher** (original): ~500 FPS-equivalent
+- **Nachher** (optimiert): ~850 FPS-equivalent (~70% schneller)
 
 Hauptursachen des Ruckelns waren:
-1. `pg.mixer.Sound("sounds/explosion.mp3")` bei **jeder** Kollision (Disk-I/O pro Frame)
-2. `pg.font.SysFont(...)` 60× pro Sekunde im HUD
-3. Pro Asteroid eine neue `pg.sprite.Group()` in der Kollisions-Schleife
-4. `Shockwave`-Surface war 1280×1280px (jetzt 720×720)
-5. `pg.transform.rotate` lief jedes Frame auch ohne Winkeländerung
+1. `pg.mixer.Sound(...)` bei **jeder** Kollision (Disk-I/O pro Frame) → jetzt gecacht
+2. `pg.font.SysFont(...)` 60× pro Sekunde im HUD → jetzt gecacht
+3. Pro Asteroid eine neue `pg.sprite.Group()` in der Kollisions-Schleife → `groupcollide` direkt
+4. `Shockwave`-Surface war 1280×1280px → jetzt 720×720, nur Redraw bei Radiusänderung
+5. `pg.transform.rotate` lief jedes Frame → jetzt nur bei Winkeländerung
+6. `pg.mixer.music.unpause()` lief 60× pro Sekunde → jetzt nur nach ESC-Menü
