@@ -18,7 +18,7 @@ fi
 # pygame installieren
 echo "==> Installiere/prüfe pygame..."
 "$VENV/bin/pip" install --quiet --upgrade pip
-"$VENV/bin/pip" install --quiet pygame
+"$VENV/bin/pip" install --quiet pygame-ce
 
 # alias in ~/.bashrc eintragen (idempotent)
 ALIAS_LINE="alias spacegame='$VENV/bin/python $GAME_DIR/main.py'"
